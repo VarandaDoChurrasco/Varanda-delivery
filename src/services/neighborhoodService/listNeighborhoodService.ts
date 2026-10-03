@@ -1,4 +1,4 @@
-import { prisma } from "../../lib/prisma";
+import { prisma } from "../../lib/prisma.js";
 
 class listNeighborhoodService {
   async execute() {
@@ -7,6 +7,8 @@ class listNeighborhoodService {
         nome: "asc",
       },
     });
+
+    console.log("BAIRROS NO SERVICE:", bairros);
 
     return bairros;
   }

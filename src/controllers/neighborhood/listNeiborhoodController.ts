@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { listNeighborhoodService } from "../../services/neighborhoodService/listNeighborhoodService";
+import { listNeighborhoodService } from "../../services/neighborhoodService/listNeighborhoodService.js";
 
 class listBairroController {
   async handle(req: Request, res: Response) {

@@ -1,5 +1,5 @@
-import { prisma } from "../../lib/prisma";
-import { RemoveCartRequest } from "../../type/type";
+import { prisma } from "../../lib/prisma.js";
+import { RemoveCartRequest } from "../../type/type.js";
 
 class cartRemocaoService {
   async execulte(dados: RemoveCartRequest) {

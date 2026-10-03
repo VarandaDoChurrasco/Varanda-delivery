@@ -1,12 +1,12 @@
 import { Request, Response } from "express";
-import { getMenuService } from "../../services/menuService/getMenuService";
+import { GetMenuService } from "../../services/menuService/getMenuService.js";
 
 class getMenuController {
   async handle(req: Request, res: Response) {
     try {
-      const getMenu = new getMenuService();
+      const getMenu = new GetMenuService();
 
-      const menu = await getMenu.execulte();
+      const menu = await getMenu.execute();
 
       return res.status(200).json(menu);
     } catch (error) {

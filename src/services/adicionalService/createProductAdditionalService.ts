@@ -1,5 +1,5 @@
-import { prisma } from "../../lib/prisma";
-import { ProdutoAdicionalCreateRequest } from "../../type/type";
+import { prisma } from "../../lib/prisma.js";
+import { ProdutoAdicionalCreateRequest } from "../../type/type.js";
 
 class createProductAdditionalService {
   async execulte(dados: ProdutoAdicionalCreateRequest) {

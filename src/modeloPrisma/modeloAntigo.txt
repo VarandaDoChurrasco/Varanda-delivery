@@ -1,0 +1,301 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum StatusCarrinho {
+
+  ABERTO
+  FINALIZADO
+  ABANDONADO
+}
+
+enum TipoPedido {
+  DELIVERY
+  RETIRADA
+}
+
+enum StatusPedido {
+  AGUARDANDO_CONFIRMACAO
+  CONFIRMADO
+  EM_PREPARO
+  PRONTO
+  SAIU_PARA_ENTREGA
+  ENTREGUE
+  CANCELADO
+}
+
+enum ModoAtendimento {
+  IA
+  HUMANO
+}
+
+
+enum FormaPagamento {
+  PIX
+  DINHEIRO
+  DEBITO
+  CREDITO
+}
+
+model Categoria {
+  id        String    @id @default(uuid())
+  nome      String
+  ordem     Int       @default(0)
+  ativo     Boolean   @default(true)
+
+  produtos  Produto[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Produto {
+  id          String    @id @default(uuid())
+  nome        String    @unique
+  descricao   String?
+  preco       Decimal   @db.Decimal(10, 2)
+  disponivel  Boolean   @default(true)
+  ativo       Boolean   @default(true)
+
+  categoriaId String
+  categoria   Categoria @relation(fields: [categoriaId], references: [id])
+
+  cardapios      CardapioItem[]
+  adicionais     ProdutoAdicional[]
+  carrinhoItens  CarrinhoItem[]
+  pedidoItens    PedidoItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+
+model ProdutoAdicional {
+  produtoId    String
+  adicionalId  String
+
+  produto      Produto   @relation(fields: [produtoId], references: [id])
+  adicional    Adicional @relation(fields: [adicionalId], references: [id])
+
+  @@id([produtoId, adicionalId])
+}
+
+model Bairro {
+  id            String   @id @default(uuid())
+  nome          String   @unique
+  taxaEntrega   Decimal  @db.Decimal(10, 2)
+  ativo         Boolean  @default(true)
+
+  pedidos       Pedido[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Cliente {
+  id        String   @id @default(uuid())
+  nome      String?
+  telefone  String   @unique
+
+  carrinhos Carrinho[]
+  pedidos   Pedido[]
+  
+  modoAtendimento ModoAtendimento @default(IA)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Carrinho {
+  id        String          @id @default(uuid())
+  status    StatusCarrinho  @default(ABERTO)
+
+  clienteId String
+  cliente   Cliente @relation(fields: [clienteId], references: [id])
+
+  itens     CarrinhoItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model CarrinhoItem {
+  id          String   @id @default(uuid())
+
+  quantidade  Int
+
+  precoUnitario Decimal @db.Decimal(10, 2)
+
+  observacao  String?
+
+  carrinhoId  String
+  produtoId   String
+
+   adicionais CarrinhoItemAdicional[]
+   remocoes   CarrinhoItemRemocao[]
+
+   createdAt DateTime @default(now())
+   updatedAt DateTime @updatedAt
+
+  carrinho    Carrinho @relation(fields: [carrinhoId], references: [id])
+  produto     Produto  @relation(fields: [produtoId], references: [id])
+
+
+}
+
+model Cardapio {
+  id        String         @id @default(uuid())
+  data      DateTime       @db.Date
+  ativo     Boolean        @default(true)
+  itens     CardapioItem[]
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  @@unique([data])
+}
+
+model CardapioItem {
+  id         String   @id @default(uuid())
+  preco      Decimal  @db.Decimal(10, 2)
+  disponivel Boolean  @default(true)
+  ordem      Int      @default(0)
+
+  cardapioId String
+  produtoId  String
+
+  cardapio   Cardapio @relation(fields: [cardapioId], references: [id])
+  produto    Produto  @relation(fields: [produtoId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([cardapioId, produtoId])
+}
+
+model CarrinhoItemAdicional {
+  id            String  @id @default(uuid())
+  quantidade    Int     @default(1)
+  precoUnitario Decimal @db.Decimal(10, 2)
+
+  carrinhoItemId String
+  adicionalId    String
+
+  carrinhoItem CarrinhoItem @relation(fields: [carrinhoItemId], references: [id])
+  adicional    Adicional    @relation(fields: [adicionalId], references: [id])
+
+  @@unique([carrinhoItemId, adicionalId])
+}
+
+model Adicional {
+  id        String   @id @default(uuid())
+  nome      String   @unique
+  preco     Decimal  @db.Decimal(10, 2)
+  ativo     Boolean  @default(true)
+
+  produtos ProdutoAdicional[]
+  carrinhoItens CarrinhoItemAdicional[]
+  pedidoItens   PedidoItemAdicional[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model PedidoItemAdicional {
+  id            String  @id @default(uuid())
+  quantidade    Int     @default(1)
+  nome          String
+  precoUnitario Decimal @db.Decimal(10, 2)
+
+  pedidoItemId String
+  adicionalId  String?
+
+  pedidoItem PedidoItem @relation(fields: [pedidoItemId], references: [id])
+  adicional  Adicional? @relation(fields: [adicionalId], references: [id])
+
+  @@index([pedidoItemId])
+}
+
+model CarrinhoItemRemocao {
+  id          String @id @default(uuid())
+  ingrediente String
+
+  carrinhoItemId String
+
+  carrinhoItem CarrinhoItem @relation(fields: [carrinhoItemId], references: [id])
+
+  @@index([carrinhoItemId])
+}
+
+model Pedido {
+  id              String          @id @default(uuid())
+
+  numero          Int             @unique @default(autoincrement())
+
+  tipo            TipoPedido
+  status          StatusPedido    @default(AGUARDANDO_CONFIRMACAO)
+
+  subtotal        Decimal         @db.Decimal(10, 2)
+  taxaEntrega     Decimal         @db.Decimal(10, 2)
+  total           Decimal         @db.Decimal(10, 2)
+
+  formaPagamento  FormaPagamento?
+  trocoPara       Decimal?        @db.Decimal(10, 2)
+
+  endereco        String?
+ 
+  complemento     String?
+  referencia      String?
+
+  clienteId       String
+  bairroId        String?
+
+  cliente         Cliente @relation(fields: [clienteId], references: [id])
+  bairro          Bairro? @relation(fields: [bairroId], references: [id])
+
+  itens           PedidoItem[]
+
+  confirmadoEm    DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model PedidoItem {
+  id             String  @id @default(uuid())
+
+  produtoNome    String
+  quantidade     Int
+  precoUnitario  Decimal @db.Decimal(10, 2)
+
+  observacao     String?
+
+  pedidoId       String
+  produtoId      String
+
+ adicionais PedidoItemAdicional[]
+ remocoes   PedidoItemRemocao[]
+
+  pedido         Pedido  @relation(fields: [pedidoId], references: [id])
+  produto        Produto @relation(fields: [produtoId], references: [id])
+
+  createdAt      DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model PedidoItemRemocao {
+  id          String @id @default(uuid())
+  ingrediente String
+
+  pedidoItemId String
+
+  pedidoItem PedidoItem @relation(fields: [pedidoItemId], references: [id])
+
+  @@index([pedidoItemId])
+}

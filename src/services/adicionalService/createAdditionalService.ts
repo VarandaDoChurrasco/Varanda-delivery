@@ -1,5 +1,5 @@
-import { prisma } from "../../lib/prisma";
-import { AdicionalCreateRequest } from "../../type/type";
+import { prisma } from "../../lib/prisma.js";
+import { AdicionalCreateRequest } from "../../type/type.js";
 
 class createAdditionalService {
   async execulte(dados: AdicionalCreateRequest) {

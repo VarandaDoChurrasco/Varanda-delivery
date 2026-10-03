@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
-import { CardapioItemCreateRequest } from "../../type/type";
-import { createMenuItemService } from "../../services/menuService/CreateMenuItemService";
+import { CardapioItemCreateRequest } from "../../type/type.js";
+import { createMenuItemService } from "../../services/menuService/CreateMenuItemService.js";
 
 class createCardapioItemController {
   async handle(req: Request, res: Response) {

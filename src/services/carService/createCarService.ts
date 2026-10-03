@@ -1,5 +1,5 @@
-import { prisma } from "../../lib/prisma";
-import { CarrinhoCreateRequest } from "../../type/type";
+import { prisma } from "../../lib/prisma.js";
+import { CarrinhoCreateRequest } from "../../type/type.js";
 
 class createCartService {
   async execulte(dados: CarrinhoCreateRequest) {
@@ -28,6 +28,7 @@ class createCartService {
         itens: {
           include: {
             produto: true,
+            escolhas: true,
             adicionais: {
               include: {
                 adicional: true,
@@ -54,6 +55,7 @@ class createCartService {
         itens: {
           include: {
             produto: true,
+            escolhas: true,
             adicionais: {
               include: {
                 adicional: true,

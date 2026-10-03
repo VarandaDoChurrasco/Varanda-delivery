@@ -1,15 +1,15 @@
 import { Request, Response } from "express";
-import { CarrinhoItemCreateRequest } from "../../type/type";
-import { createCartItemService } from "../../services/carService/createCartService";
+import { CarrinhoItemCreateRequest } from "../../type/type.js";
+import { CreateCartItemService } from "../../services/carService/createitemCartService.js";
 
 class createCartItemController {
   async handle(req: Request, res: Response) {
-    const dados: CarrinhoItemCreateRequest = req.body;
+    const dados: any = req.body;
 
     try {
-      const createCartItem = new createCartItemService();
+      const createCartItem = new CreateCartItemService();
 
-      const cartItem = await createCartItem.execulte(dados);
+      const cartItem = await createCartItem.execute(dados);
 
       return res.status(201).json(cartItem);
     } catch (error) {

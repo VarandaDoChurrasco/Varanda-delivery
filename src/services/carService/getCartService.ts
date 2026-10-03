@@ -1,11 +1,11 @@
-import { prisma } from "../../lib/prisma";
+import { prisma } from "../../lib/prisma.js";
 
 class getCartService {
   async execulte(carrinhoId: string) {
     if (!carrinhoId) {
       throw new Error("Informe o carrinhoId.");
     }
-
+    console.log("ID recebido no service:", carrinhoId);
     const carrinho = await prisma.carrinho.findUnique({
       where: {
         id: carrinhoId,

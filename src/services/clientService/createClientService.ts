@@ -1,5 +1,5 @@
-import { prisma } from "../../lib/prisma";
-import { CreateClientRequest } from "../../type/type";
+import { prisma } from "../../lib/prisma.js";
+import { CreateClientRequest } from "../../type/type.js";
 
 //interface CreateClientRequest {
 // nome?: string;

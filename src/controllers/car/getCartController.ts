@@ -1,10 +1,10 @@
 import { Request, Response } from "express";
-import { getCartService } from "../../services/carService/getCartService";
+import { getCartService } from "../../services/carService/getCartService.js";
 
 class getCartController {
   async handle(req: Request, res: Response) {
     const { id } = req.params;
-
+    console.log("ID RECEBIDO NO GET CART:", id);
     try {
       if (Array.isArray(id)) {
         return res.status(400).json({

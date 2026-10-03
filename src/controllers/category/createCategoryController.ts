@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { CreateCategoryService } from "../../services/categoryService/createCategoryService";
+import { CreateCategoryService } from "../../services/categoryService/createCategoryService.js";
 
 class createCategoryController {
   async handle(req: Request, res: Response) {

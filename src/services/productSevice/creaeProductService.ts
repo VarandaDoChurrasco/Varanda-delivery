@@ -1,6 +1,6 @@
 import { error } from "console";
-import { prisma } from "../../lib/prisma";
-import { ProdutoCreateRequest } from "../../type/type";
+import { prisma } from "../../lib/prisma.js";
+import { ProdutoCreateRequest } from "../../type/type.js";
 
 class createProductService {
   async execulte(dados: ProdutoCreateRequest) {

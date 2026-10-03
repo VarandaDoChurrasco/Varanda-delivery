@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
-import { CarrinhoItemAdicionalCreateRequest } from "../../type/type";
-import { createCartItemAdditionalService } from "../../services/carService/createCartItemAdicionalService";
+import { CarrinhoItemAdicionalCreateRequest } from "../../type/type.js";
+import { createCartItemAdditionalService } from "../../services/carService/createCartItemAdicionalService.js";
 
 class createCartItemAdditionalController {
   async handle(req: Request, res: Response) {

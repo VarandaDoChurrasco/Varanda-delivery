@@ -1,4 +1,4 @@
-import { prisma } from "../../lib/prisma";
+import { prisma } from "../../lib/prisma.js";
 
 export class CreateCategoryService {
   async execute({ nome }: { nome: string | null }) {

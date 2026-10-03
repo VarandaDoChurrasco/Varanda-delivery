@@ -1,7 +1,7 @@
-import { prisma } from "../../lib/prisma";
+import { prisma } from "../../lib/prisma.js";
 
-class getMenuService {
-  async execulte() {
+class GetMenuService {
+  async execute() {
     const agora = new Date();
 
     const inicioDoDia = new Date(
@@ -16,6 +16,7 @@ class getMenuService {
       agora.getDate() + 1,
     );
 
+    // Busca o cardápio de hoje
     const cardapio = await prisma.cardapio.findFirst({
       where: {
         data: {
@@ -25,20 +26,16 @@ class getMenuService {
         ativo: true,
       },
       include: {
-        itens: {
+        cardapioOpcaoQuentinhas: {
           where: {
             disponivel: true,
-            produto: {
+            opcao: {
               ativo: true,
               disponivel: true,
             },
           },
           include: {
-            produto: {
-              include: {
-                categoria: true,
-              },
-            },
+            opcao: true,
           },
           orderBy: {
             ordem: "asc",
@@ -51,50 +48,56 @@ class getMenuService {
       throw new Error("Não existe cardápio disponível para hoje.");
     }
 
-    const categoriasMap = new Map<
-      string,
-      {
-        id: string;
-        nome: string;
-        ordem: number;
-        produtos: any[];
+    // Busca os tamanhos disponíveis
+    const tamanhos = await prisma.tamanhoQuentinha.findMany({
+      where: {
+        ativo: true,
+      },
+      orderBy: {
+        preco: "asc",
+      },
+    });
+
+    const acompanhamentos = [];
+    const proteinas = [];
+    const saladas = [];
+
+    for (const item of cardapio.cardapioOpcaoQuentinhas) {
+      const opcao = {
+        id: item.opcao.id,
+        nome: item.opcao.nome,
+      };
+
+      if (item.tipo === "ACOMPANHAMENTO") {
+        acompanhamentos.push(opcao);
       }
-    >();
 
-    for (const item of cardapio.itens) {
-      const categoria = item.produto.categoria;
-
-      if (!categoriasMap.has(categoria.id)) {
-        categoriasMap.set(categoria.id, {
-          id: categoria.id,
-          nome: categoria.nome,
-          ordem: categoria.ordem,
-          produtos: [],
-        });
+      if (item.tipo === "PROTEINA") {
+        proteinas.push(opcao);
       }
 
-      categoriasMap.get(categoria.id)?.produtos.push({
-        id: item.produto.id,
-        nome: item.produto.nome,
-        descricao: item.produto.descricao,
-        preco: item.preco,
-        ordem: item.ordem,
-      });
+      if (item.tipo === "SALADA") {
+        saladas.push(opcao);
+      }
     }
-
-    const categorias = Array.from(categoriasMap.values())
-      .sort((a, b) => a.ordem - b.ordem)
-      .map((categoria) => ({
-        ...categoria,
-        produtos: categoria.produtos.sort((a, b) => a.ordem - b.ordem),
-      }));
 
     return {
       id: cardapio.id,
-      data: cardapio.data,
-      categorias,
+
+      data: cardapio.data.toISOString().split("T")[0],
+
+      tamanhos: tamanhos.map((tamanho) => ({
+        id: tamanho.id,
+        nome: tamanho.nome,
+        preco: Number(tamanho.preco),
+        maxProteinas: tamanho.maxProteinas,
+      })),
+
+      acompanhamentos,
+      proteinas,
+      saladas,
     };
   }
 }
 
-export { getMenuService };
+export { GetMenuService };

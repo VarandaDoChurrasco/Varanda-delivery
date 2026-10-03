@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
-import { ProdutoCreateRequest } from "../../type/type";
-import { createProductService } from "../../services/productSevice/creaeProductService";
+import { ProdutoCreateRequest } from "../../type/type.js";
+import { createProductService } from "../../services/productSevice/creaeProductService.js";
 
 class createProductController {
   async handle(req: Request, res: Response) {

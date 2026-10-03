@@ -1,5 +1,5 @@
-import { prisma } from "../../lib/prisma";
-import { CarrinhoItemAdicionalCreateRequest } from "../../type/type";
+import { prisma } from "../../lib/prisma.js";
+import { CarrinhoItemAdicionalCreateRequest } from "../../type/type.js";
 
 class createCartItemAdditionalService {
   async execulte(dados: CarrinhoItemAdicionalCreateRequest) {

@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { getNeighborhoodService } from "../../services/neighborhoodService/getIdNeighborhoodService";
+import { getNeighborhoodService } from "../../services/neighborhoodService/getIdNeighborhoodService.js";
 
 class getBairroController {
   async handle(req: Request, res: Response) {
@@ -27,8 +27,9 @@ class getBairroController {
       return res.status(500).json({
         error: "Erro interno do servidor.",
       });
+      // });
+      //========================================
     }
   }
 }
-
 export { getBairroController };

@@ -1,5 +1,5 @@
-import { prisma } from "../../lib/prisma";
-import { BairroCreateRequest } from "../../type/type";
+import { prisma } from "../../lib/prisma.js";
+import { BairroCreateRequest } from "../../type/type.js";
 
 class createBairroService {
   async execute(dados: BairroCreateRequest) {

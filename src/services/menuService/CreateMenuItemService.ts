@@ -1,5 +1,5 @@
-import { prisma } from "../../lib/prisma";
-import { CardapioItemCreateRequest } from "../../type/type";
+import { prisma } from "../../lib/prisma.js";
+import { CardapioItemCreateRequest } from "../../type/type.js";
 
 class createMenuItemService {
   async execulte(dados: CardapioItemCreateRequest) {

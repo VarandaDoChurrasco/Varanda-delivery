@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
-import { BairroCreateRequest } from "../../type/type";
-import { createBairroService } from "../../services/neighborhoodService/createNeighborhoodService";
+import { BairroCreateRequest } from "../../type/type.js";
+import { createBairroService } from "../../services/neighborhoodService/createNeighborhoodService.js";
 
 class createBairroController {
   async handle(req: Request, res: Response) {

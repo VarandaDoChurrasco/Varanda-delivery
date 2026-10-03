@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
-import { CarrinhoCreateRequest } from "../../type/type";
-import { createCartService } from "../../services/carService/createCarService";
+import { CarrinhoCreateRequest } from "../../type/type.js";
+import { createCartService } from "../../services/carService/createCarService.js";
 
 class createCartController {
   async handle(req: Request, res: Response) {

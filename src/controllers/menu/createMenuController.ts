@@ -1,13 +1,13 @@
 import { Request, Response } from "express";
-import { CardapioCreateRequest } from "../../type/type";
-import { createCardapioService } from "../../services/menuService/createMenuService";
+import { CardapioCreateRequest } from "../../type/type.js";
+import { CreateCardapioService } from "../../services/menuService/createMenuService.js";
 
 class createCardapioController {
   async handle(req: Request, res: Response) {
     const dados: CardapioCreateRequest = req.body;
 
     try {
-      const createCardapio = new createCardapioService();
+      const createCardapio = new CreateCardapioService();
 
       const cardapio = await createCardapio.execulte(dados);
 

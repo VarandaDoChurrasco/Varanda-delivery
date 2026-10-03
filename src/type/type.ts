@@ -4,9 +4,22 @@ export interface CreateClientRequest {
   nome?: string;
   telefone: string;
 }
+export interface GetClientRequest {
+  id: string;
+  telefone: string;
+  nome: string | null;
+  modoAtendimento: "IA" | "HUMANO";
+  createdAt: Date;
+  updatedAt: Date;
+}
 
 export interface CarrinhoCreateRequest {
   clienteId: string;
+}
+export interface TamanhoQuentinhaData {
+  nome: string;
+  preco: number;
+  maxProteinas: number;
 }
 
 export interface CarrinhoItemCreateRequest {
@@ -59,6 +72,15 @@ export interface ProdutoCreateRequest {
 
 export interface CardapioCreateRequest {
   data: string;
+  opcoes: {
+    opcaoId: string;
+    ordem?: number;
+  }[];
+}
+export interface CardapioItemInput {
+  produtoId: string;
+  preco: number;
+  ordem?: number;
 }
 
 export interface CardapioItemCreateRequest {
@@ -71,4 +93,26 @@ export interface CardapioItemCreateRequest {
 export interface BairroCreateRequest {
   nome: string;
   taxaEntrega: number;
+}
+
+export interface CalculateCartRequest {
+  carrinhoId: string;
+  tipo: "DELIVERY" | "RETIRADA";
+  bairroId?: string;
+}
+
+export interface CheckoutRequest {
+  carrinhoId: string;
+  tipo: "DELIVERY" | "RETIRADA";
+
+  bairroId?: string;
+
+  endereco?: string;
+  // numeroEndereco?: string;
+  complemento?: string;
+  referencia?: string;
+
+  formaPagamento: "PIX" | "DINHEIRO" | "DEBITO" | "CREDITO";
+
+  trocoPara?: number;
 }

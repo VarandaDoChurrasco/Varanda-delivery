@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
-import { RemoveCartRequest } from "../../type/type";
-import { cartRemocaoService } from "../../services/carService/cartRemoveService";
+import { RemoveCartRequest } from "../../type/type.js";
+import { cartRemocaoService } from "../../services/carService/cartRemoveService.js";
 
 class cartRemoveController {
   async handle(req: Request, res: Response) {
