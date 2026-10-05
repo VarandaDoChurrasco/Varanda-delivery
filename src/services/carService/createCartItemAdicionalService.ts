@@ -1,7 +1,8 @@
-import { prisma } from "../../lib/prisma.js";
-import { CarrinhoItemAdicionalCreateRequest } from "../../type/type.js";
+//import { prisma } from "../../lib/prisma.js";
+//import { CarrinhoItemAdicionalCreateRequest } from "../../type/type.js";
 
-class createCartItemAdditionalService {
+{
+  /*class createCartItemAdditionalService {
   async execulte(dados: CarrinhoItemAdicionalCreateRequest) {
     if (
       !dados ||
@@ -99,4 +100,5 @@ class createCartItemAdditionalService {
   }
 }
 
-export { createCartItemAdditionalService };
+export { createCartItemAdditionalService };  */
+}

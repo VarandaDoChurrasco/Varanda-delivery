@@ -17,7 +17,10 @@ class cancelOrderService {
       throw new Error("Pedido não encontrado.");
     }
 
-    if (pedido.status !== StatusPedido.AGUARDANDO_CONFIRMACAO) {
+    if (
+      pedido.status !== StatusPedido.AGUARDANDO_CONFIRMACAO &&
+      pedido.status !== StatusPedido.PRONTO
+    ) {
       throw new Error(
         `Não é possível cancelar o pedido. Status atual: ${pedido.status}`,
       );

@@ -1,7 +1,7 @@
 import { prisma } from "../../lib/prisma.js";
-import { StatusPedido } from "@prisma/client";
+import { StatusPedido, TipoPedido } from "@prisma/client";
 
-class saiuEntregaOrderService {
+class SaiuEntregaOrderService {
   async execute(id: string) {
     if (!id) {
       throw new Error("ID do pedido não informado.");
@@ -17,16 +17,17 @@ class saiuEntregaOrderService {
       throw new Error("Pedido não encontrado.");
     }
 
-    if (
-      pedido.status !== StatusPedido.EM_PREPARO &&
-      pedido.status !== StatusPedido.PRONTO
-    ) {
+    if (pedido.tipo !== TipoPedido.DELIVERY) {
+      throw new Error("Somente pedidos de entrega podem sair para entrega.");
+    }
+
+    if (pedido.status !== StatusPedido.PRONTO) {
       throw new Error(
         `Não é possível iniciar a entrega. Status atual: ${pedido.status}`,
       );
     }
 
-    const pedidoEmPreparo = await prisma.pedido.update({
+    const pedidoSaiuParaEntrega = await prisma.pedido.update({
       where: {
         id,
       },
@@ -35,8 +36,8 @@ class saiuEntregaOrderService {
       },
     });
 
-    return pedidoEmPreparo;
+    return pedidoSaiuParaEntrega;
   }
 }
 
-export { saiuEntregaOrderService };
+export { SaiuEntregaOrderService };

@@ -1,7 +1,8 @@
-import { prisma } from "../../lib/prisma.js";
-import { StatusPedido } from "@prisma/client";
+//import { prisma } from "../../lib/prisma.js";
+//import { StatusPedido } from "@prisma/client";
 
-class startPreparationOrderService {
+{
+  /*class startPreparationOrderService {
   async execute(id: string) {
     if (!id) {
       throw new Error("ID do pedido não informado.");
@@ -30,10 +31,11 @@ class startPreparationOrderService {
       data: {
         status: StatusPedido.EM_PREPARO,
       },
-    });
+    });  
 
     return pedidoEmPreparo;
   }
 }
 
-export { startPreparationOrderService };
+export { startPreparationOrderService };  */
+}

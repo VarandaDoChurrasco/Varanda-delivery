@@ -18,8 +18,8 @@ import { getMenuController } from "../controllers/menu/getMeuController.js";
 //============================CARRINHO DE COMPRA===========================================================
 import { createCartController } from "../controllers/car/createCarController.js";
 import { createCartItemController } from "../controllers/car/createCartItemController.js";
-import { createCartItemAdditionalController } from "../controllers/car/createCartItemAdicionalController.js";
-import { cartRemoveController } from "../controllers/car/cartRemoveController.js";
+//import { createCartItemAdditionalController } from "../controllers/car/createCartItemAdicionalController.js";
+import { cartRemoveController } from "../controllers/car/cartRemoveIngledientesController.js";
 import { getCartController } from "../controllers/car/getCartController.js";
 import { calculateCartController } from "../controllers/car/calculateCartController.js";
 
@@ -37,8 +37,8 @@ import { getBairroController } from "../controllers/neighborhood/getIdNeighborho
 import { createPedidoController } from "../controllers/order/createOrderController.js";
 import { confirmOrderController } from "../controllers/order/confirmOrderController.js";
 import { cancelOrderController } from "../controllers/order/cancelOrderController.js";
-import { startPreparationOrderController } from "../controllers/order/startPreparationOrderController.js";
-import { readyPreparationOrderController } from "../controllers/order/readyPreparationOrderController.js";
+//import { startPreparationOrderController } from "../controllers/order/startPreparationOrderController.js";
+//import { readyPreparationOrderController } from "../controllers/order/readyPreparationOrderController.js";
 import { saiuEntregaOrderController } from "../controllers/order/outForDeliveryOrderController.js";
 import { entregueOrderController } from "../controllers/order/deliveredOrderController.js";
 import { getOrderController } from "../controllers/order/getIdOrderController.js";
@@ -61,6 +61,7 @@ import { CadastrarRefrigeranteController } from "../controllers/refrigentesContr
 import { CadastrarListaRefrigerantesController } from "../controllers/refrigentesController/cadastrarListaRefrigerantesController.js";
 import { ConsultarListRefrigerantesController } from "../controllers/refrigentesController/consultarListRefrigeranteController.js";
 import { ConsultarIdRefrigerantesController } from "../controllers/refrigentesController/consultarIdRefrigeranteController.js";
+import { RemoverRefrigeranteController } from "../controllers/refrigentesController/removeRefrigeranteController.js";
 
 const router = Router();
 
@@ -85,6 +86,7 @@ router.post(
   "/cadastrarListaRefrigerantes",
   new CadastrarListaRefrigerantesController().handle,
 );
+router.delete("/deleteRefri", new RemoverRefrigeranteController().handle);
 
 //===================================QUENTINHA=========================================
 router.post("/criarQuentinha", new OpcaoQuentinhaController().criar);
@@ -135,10 +137,10 @@ router.get("/getMenu", new getMenuController().handle);
 //==================================CARRINHO DE COMPRAS=========================
 router.post("/cart", new createCartController().handle);
 router.post("/cartItem", new createCartItemController().handle);
-router.post(
-  "/cart-item-additional",
-  new createCartItemAdditionalController().handle,
-);
+//router.post(
+// "/cart-item-additional",
+// new createCartItemAdditionalController().handle,
+//);
 router.post("/cart-item-remove", new cartRemoveController().handle);
 router.get("/getCart/:id", new getCartController().handle);
 router.post("/calculateCart", new calculateCartController().handle);
@@ -165,14 +167,7 @@ router.get("/getBairro/:id", new getBairroController().handle);
 router.post("/createOrder", new createPedidoController().handle);
 router.post("/confirmOrder/:id/confirmar", new confirmOrderController().handle);
 router.post("/confirmOrder/:id/cancel", new cancelOrderController().handle);
-router.post(
-  "/confirmOrder/:id/iniciar",
-  new startPreparationOrderController().handle,
-);
-router.post(
-  "/confirmOrder/:id/pronto",
-  new readyPreparationOrderController().handle,
-);
+
 router.post(
   "/confirmOrder/:id/saiuEntrega",
   new saiuEntregaOrderController().handle,

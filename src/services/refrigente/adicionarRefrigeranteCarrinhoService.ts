@@ -62,7 +62,8 @@ class AdicionarRefrigeranteCarrinhoService {
       },
     });
 
-    if (itemExistente) {
+    {
+      /* if (itemExistente) {
       return prisma.carrinhoRefrigerante.update({
         where: {
           id: itemExistente.id,
@@ -74,6 +75,18 @@ class AdicionarRefrigeranteCarrinhoService {
         include: {
           refrigerante: true,
         },
+      });
+    }*/
+    }
+
+    if (itemExistente) {
+      return prisma.carrinhoRefrigerante.update({
+        where: { id: itemExistente.id },
+        data: {
+          quantidade: dados.quantidade,
+          precoUnitario: refrigerante.preco,
+        },
+        include: { refrigerante: true },
       });
     }
 

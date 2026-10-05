@@ -9,8 +9,7 @@ export const adicionarRefrigeranteTool = {
     name: "adicionar_refrigerante",
 
     description:
-      "Adiciona um refrigerante ao carrinho aberto do cliente. Use somente o refrigeranteId real retornado pela ferramenta consultar_refrigerantes. O preço é obtido diretamente do banco.",
-
+      "Define a quantidade de um refrigerante no carrinho aberto do cliente. Use somente quando o cliente disser explicitamente que deseja adicionar ou alterar a quantidade daquele refrigerante. A quantidade informada representa a quantidade FINAL desejada, e não uma quantidade adicional.",
     parameters: {
       type: "object",
 

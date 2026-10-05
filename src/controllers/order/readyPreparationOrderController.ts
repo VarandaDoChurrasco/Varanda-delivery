@@ -1,4 +1,5 @@
-import { Request, Response } from "express";
+{
+  /*import { Request, Response } from "express";
 import { readyPreparationOrderService } from "../../services/orderService/readyPreparationOrderService.js";
 
 class readyPreparationOrderController {
@@ -30,4 +31,5 @@ class readyPreparationOrderController {
   }
 }
 
-export { readyPreparationOrderController };
+export { readyPreparationOrderController };*/
+}

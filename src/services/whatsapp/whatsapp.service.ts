@@ -17,6 +17,12 @@ import { GetClientRequest } from "../../type/type.js";
 import { ExtrairCardapioDaImagemService } from "../menuService/extrairCardapioDaImagem.service.js";
 import { CardapioPendenteService } from "../menuService/cardapioPendente.service.js";
 import { CadastrarCardapioService } from "../menuService/cadastrarCardapioService.js";
+import { CadastrarRefrigeranteService } from "../refrigente/cadastrarRefrigeranteService.js";
+import { ProcessarComandoRefrigeranteService } from "../refrigente/processarComandoRefrigeranteService.js";
+import { ProcessarComandoBairroService } from "../neighborhoodService/processarComandoBairroService.js";
+import { ProcessarComandoStatusService } from "../orderService/processarComandoStatusService.js";
+
+import { setWhatsAppSocket } from "../../lib/whatsappSocket.js";
 
 export class WhatsAppService {
   private heliaService: HeliaService;
@@ -26,12 +32,17 @@ export class WhatsAppService {
   private extrairCardapioDaImagemService: ExtrairCardapioDaImagemService;
   private cardapioPendenteService: CardapioPendenteService;
   private cadastrarCardapioService: CadastrarCardapioService;
+  private cadastrarRefrigeranteService: CadastrarRefrigeranteService;
+  private processarComandoRefrigeranteService: ProcessarComandoRefrigeranteService;
+  private processarComandoBairroService: ProcessarComandoBairroService;
+  private processarComandoStatusService: ProcessarComandoStatusService;
   // private getClient = new getClientService();
   // private createClient = new CreateClientService();
 
   // constructor(heliaService: HeliaService) {
   //  this.heliaService = heliaService;
   // }
+
   constructor() {
     this.heliaService = new HeliaService();
     this.getClientService = new getClientService();
@@ -39,6 +50,11 @@ export class WhatsAppService {
     this.extrairCardapioDaImagemService = new ExtrairCardapioDaImagemService();
     this.cardapioPendenteService = new CardapioPendenteService();
     this.cadastrarCardapioService = new CadastrarCardapioService();
+    this.cadastrarRefrigeranteService = new CadastrarRefrigeranteService();
+    this.processarComandoRefrigeranteService =
+      new ProcessarComandoRefrigeranteService();
+    this.processarComandoBairroService = new ProcessarComandoBairroService();
+    this.processarComandoStatusService = new ProcessarComandoStatusService();
   }
   async iniciar() {
     const { state, saveCreds } = await useMultiFileAuthState(
@@ -49,6 +65,7 @@ export class WhatsAppService {
       auth: state,
       printQRInTerminal: false,
     });
+    // setWhatsAppSocket(sock);
 
     console.log("📱 CONTA CONECTADA:", sock.user);
 
@@ -189,16 +206,61 @@ export class WhatsAppService {
         // ==========================================
 
         if (ehMinhaConta) {
+          //===============================================
           const textoAdmin =
             message.message.conversation ||
             message.message.extendedTextMessage?.text ||
             "";
+
+          const respostaBairro =
+            await this.processarComandoBairroService.execute(textoAdmin);
+
+          if (respostaBairro) {
+            await sock.sendMessage(remoteJid, {
+              text: respostaBairro,
+            });
+
+            continue;
+          }
+          const respostaRefrigerante =
+            await this.processarComandoRefrigeranteService.execute(textoAdmin);
+
+          if (respostaRefrigerante) {
+            await sock.sendMessage(remoteJid, {
+              text: respostaRefrigerante,
+            });
+
+            continue;
+          }
+
+          const respostaStatus =
+            await this.processarComandoStatusService.execute(textoAdmin);
+
+          if (respostaStatus) {
+            await sock.sendMessage(remoteJid, {
+              text: respostaStatus,
+            });
+
+            continue;
+          }
+          //=======================================================
+          //  const textoAdmin =
+          //   message.message.conversation ||
+          ///  message.message.extendedTextMessage?.text ||
+          // "";
 
           const textoNormalizado = textoAdmin
             .trim()
             .toLowerCase()
             .normalize("NFD")
             .replace(/[\u0300-\u036f]/g, "");
+
+          // ==========================================
+          // CADASTRAR REFRIGERANTE
+          // ==============================================================================================================
+          // ==========================================
+          // CADASTRAR REFRIGERANTE
+          // ==========================================
 
           if (textoNormalizado === "sim" || textoNormalizado === "cadastrar") {
             try {

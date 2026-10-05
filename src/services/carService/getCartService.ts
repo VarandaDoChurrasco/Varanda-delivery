@@ -5,16 +5,21 @@ class getCartService {
     if (!carrinhoId) {
       throw new Error("Informe o carrinhoId.");
     }
+
     console.log("ID recebido no service:", carrinhoId);
+
     const carrinho = await prisma.carrinho.findUnique({
       where: {
         id: carrinhoId,
       },
       include: {
         cliente: true,
+
         itens: {
           include: {
             produto: true,
+
+            escolhas: true,
 
             adicionais: {
               include: {
@@ -23,6 +28,12 @@ class getCartService {
             },
 
             remocoes: true,
+          },
+        },
+
+        refrigerantes: {
+          include: {
+            refrigerante: true,
           },
         },
       },
@@ -55,12 +66,20 @@ class getCartService {
         quantidade: item.quantidade,
         observacao: item.observacao,
 
-        produto: {
-          id: item.produto.id,
-          nome: item.produto.nome,
-        },
+        produto: item.produto
+          ? {
+              id: item.produto.id,
+              nome: item.produto.nome,
+            }
+          : null,
 
         precoUnitario: Number(item.precoUnitario),
+
+        escolhas: item.escolhas.map((escolha) => ({
+          id: escolha.id,
+          tipo: escolha.tipo,
+          nome: escolha.nome,
+        })),
 
         adicionais: item.adicionais.map((adicional) => ({
           id: adicional.id,
@@ -78,6 +97,23 @@ class getCartService {
       };
     });
 
+    const refrigerantes = carrinho.refrigerantes.map((item) => {
+      const precoUnitario = Number(item.precoUnitario);
+
+      const total = precoUnitario * item.quantidade;
+
+      subtotal += total;
+
+      return {
+        id: item.id,
+        refrigeranteId: item.refrigeranteId,
+        nome: item.refrigerante.nome,
+        quantidade: item.quantidade,
+        precoUnitario,
+        total,
+      };
+    });
+
     return {
       id: carrinho.id,
       status: carrinho.status,
@@ -89,6 +125,8 @@ class getCartService {
       },
 
       itens,
+
+      refrigerantes,
 
       subtotal,
       taxaEntrega: 0,

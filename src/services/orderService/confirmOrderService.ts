@@ -28,15 +28,23 @@ class confirmOrderService {
         id,
       },
       data: {
-        status: StatusPedido.CONFIRMADO,
+        status: StatusPedido.PRONTO,
         confirmadoEm: new Date(),
       },
       include: {
         cliente: true,
+
+        bairro: true,
         itens: {
           include: {
             remocoes: true,
             adicionais: true,
+            escolhas: true,
+          },
+        },
+        refrigerantes: {
+          include: {
+            refrigerante: true,
           },
         },
       },

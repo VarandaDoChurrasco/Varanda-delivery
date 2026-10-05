@@ -7,10 +7,12 @@ class DeleteCartItemService {
     }
 
     return await prisma.$transaction(async (tx) => {
-      // Verifica se o item existe
       const item = await tx.carrinhoItem.findUnique({
         where: {
           id,
+        },
+        include: {
+          carrinho: true,
         },
       });
 
@@ -18,14 +20,28 @@ class DeleteCartItemService {
         throw new Error("Item do carrinho não encontrado.");
       }
 
-      // Remove as remoções de ingredientes vinculadas ao item
+      if (item.carrinho.status !== "ABERTO") {
+        throw new Error("Este carrinho não está aberto.");
+      }
+
+      await tx.carrinhoItemEscolha.deleteMany({
+        where: {
+          carrinhoItemId: id,
+        },
+      });
+
       await tx.carrinhoItemRemocao.deleteMany({
         where: {
           carrinhoItemId: id,
         },
       });
 
-      // Remove o produto do carrinho
+      await tx.carrinhoItemAdicional.deleteMany({
+        where: {
+          carrinhoItemId: id,
+        },
+      });
+
       const deletedItem = await tx.carrinhoItem.delete({
         where: {
           id,

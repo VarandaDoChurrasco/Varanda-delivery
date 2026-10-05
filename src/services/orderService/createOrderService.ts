@@ -210,6 +210,14 @@ class createPedidoService {
 
           bairroId: dados.tipo === "DELIVERY" ? dados.bairroId : null,
 
+          refrigerantes: {
+            create: carrinho.refrigerantes.map((item) => ({
+              refrigeranteId: item.refrigeranteId,
+              quantidade: item.quantidade,
+              precoUnitario: item.precoUnitario,
+            })),
+          },
+
           itens: {
             create: carrinho.itens.map((item) => {
               const tamanho = tamanhos.find(
@@ -250,14 +258,6 @@ class createPedidoService {
                     ingrediente: remocao.ingrediente,
                   })),
                 },
-
-                refrigerantes: {
-                  create: carrinho.refrigerantes.map((item) => ({
-                    refrigeranteId: item.refrigeranteId,
-                    quantidade: item.quantidade,
-                    precoUnitario: item.precoUnitario,
-                  })),
-                },
               };
             }),
           },
@@ -273,7 +273,6 @@ class createPedidoService {
               remocoes: true,
             },
           },
-
           refrigerantes: {
             include: {
               refrigerante: true,

@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { getOrderService } from "../../services/orderService/getIdOrderService.js";
+import { GetOrderService } from "../../services/orderService/getIdOrderService.js";
 
 class getOrderController {
   async handle(req: Request, res: Response) {
@@ -12,7 +12,7 @@ class getOrderController {
         });
       }
 
-      const getOrder = new getOrderService();
+      const getOrder = new GetOrderService();
 
       const pedido = await getOrder.execute(id);
 

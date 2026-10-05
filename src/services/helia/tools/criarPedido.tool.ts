@@ -193,5 +193,6 @@ export async function executarCriarPedido(args: {
         }
       : null,
     itens: pedido.itens,
+    refrigerantes: pedido.refrigerantes,
   };
 }

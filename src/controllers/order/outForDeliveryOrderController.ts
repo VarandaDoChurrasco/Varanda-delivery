@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { saiuEntregaOrderService } from "../../services/orderService/outForDeliveryOrderController.js";
+import { SaiuEntregaOrderService } from "../../services/orderService/outForDeliveryOrderController.js";
 
 class saiuEntregaOrderController {
   async handle(req: Request, res: Response) {
@@ -11,7 +11,7 @@ class saiuEntregaOrderController {
           error: "ID inválido.",
         });
       }
-      const startPreparation = new saiuEntregaOrderService();
+      const startPreparation = new SaiuEntregaOrderService();
 
       const pedido = await startPreparation.execute(id);
 

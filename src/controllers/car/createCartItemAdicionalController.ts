@@ -1,8 +1,9 @@
-import { Request, Response } from "express";
-import { CarrinhoItemAdicionalCreateRequest } from "../../type/type.js";
-import { createCartItemAdditionalService } from "../../services/carService/createCartItemAdicionalService.js";
+//import { Request, Response } from "express";
+//import { CarrinhoItemAdicionalCreateRequest } from "../../type/type.js";
+//import { createCartItemAdditionalService } from "../../services/carService/createCartItemAdicionalService.js";
 
-class createCartItemAdditionalController {
+{
+  /*class createCartItemAdditionalController {
   async handle(req: Request, res: Response) {
     const dados: CarrinhoItemAdicionalCreateRequest = req.body;
 
@@ -26,4 +27,5 @@ class createCartItemAdditionalController {
   }
 }
 
-export { createCartItemAdditionalController };
+export { createCartItemAdditionalController };*/
+}

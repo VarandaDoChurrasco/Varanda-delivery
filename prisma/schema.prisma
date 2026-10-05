@@ -30,8 +30,6 @@ enum TipoPedido {
 
 enum StatusPedido {
   AGUARDANDO_CONFIRMACAO
-  CONFIRMADO
-  EM_PREPARO
   PRONTO
   SAIU_PARA_ENTREGA
   ENTREGUE
@@ -51,13 +49,13 @@ enum FormaPagamento {
 }
 
 model Refrigerante {
-  id        String   @id @default(uuid())
+  id        String               @id @default(uuid())
   nome      String
-  preco     Decimal  @db.Decimal(10, 2)
-  ativo     Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  pedidos PedidoRefrigerante[]
+  preco     Decimal              @db.Decimal(10, 2)
+  ativo     Boolean              @default(true)
+  createdAt DateTime             @default(now())
+  updatedAt DateTime             @updatedAt
+  pedidos   PedidoRefrigerante[]
 
   carrinhos CarrinhoRefrigerante[]
 
@@ -217,22 +215,22 @@ model Carrinho {
   clienteId String
   cliente   Cliente @relation(fields: [clienteId], references: [id])
 
-  itens CarrinhoItem[]
- refrigerantes CarrinhoRefrigerante[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  itens         CarrinhoItem[]
+  refrigerantes CarrinhoRefrigerante[]
+  createdAt     DateTime               @default(now())
+  updatedAt     DateTime               @updatedAt
 }
 
 model CarrinhoRefrigerante {
-  id            String   @id @default(uuid())
-  quantidade    Int      @default(1)
-  precoUnitario Decimal  @db.Decimal(10, 2)
+  id            String  @id @default(uuid())
+  quantidade    Int     @default(1)
+  precoUnitario Decimal @db.Decimal(10, 2)
 
-  carrinhoId    String
+  carrinhoId     String
   refrigeranteId String
 
-  carrinho      Carrinho      @relation(fields: [carrinhoId], references: [id], onDelete: Cascade)
-  refrigerante  Refrigerante  @relation(fields: [refrigeranteId], references: [id])
+  carrinho     Carrinho     @relation(fields: [carrinhoId], references: [id], onDelete: Cascade)
+  refrigerante Refrigerante @relation(fields: [refrigeranteId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -414,9 +412,9 @@ model PedidoItem {
 }
 
 model PedidoRefrigerante {
-  id             String   @id @default(uuid())
-  quantidade     Int      @default(1)
-  precoUnitario  Decimal  @db.Decimal(10, 2)
+  id            String  @id @default(uuid())
+  quantidade    Int     @default(1)
+  precoUnitario Decimal @db.Decimal(10, 2)
 
   pedidoId       String
   refrigeranteId String
