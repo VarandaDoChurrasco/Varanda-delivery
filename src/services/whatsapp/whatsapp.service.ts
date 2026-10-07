@@ -64,50 +64,16 @@ export class WhatsAppService {
       "./auth_info_baileys",
     );
 
-    //=========================================================
     const sock = makeWASocket({
       auth: state,
       printQRInTerminal: false,
     });
-
     setWhatsAppSocket(sock);
 
     console.log("📱 CONTA CONECTADA:", sock.user);
 
     sock.ev.on("creds.update", saveCreds);
 
-    if (!state.creds.registered) {
-      const phoneNumber = process.env.WHATSAPP_PHONE_NUMBER;
-
-      if (!phoneNumber) {
-        throw new Error("WHATSAPP_PHONE_NUMBER não configurado.");
-      }
-
-      setTimeout(async () => {
-        try {
-          const code = await sock.requestPairingCode(phoneNumber, "VARANDA1");
-
-          console.log("\n====================================");
-          console.log("🔐 CÓDIGO DE PAREAMENTO:", code);
-          console.log("====================================\n");
-        } catch (error) {
-          console.error("❌ Erro ao gerar código de pareamento:", error);
-        }
-      }, 3000);
-    }
-    //=====================================================================
-    {
-      /*}  const sock = makeWASocket({
-      auth: state,
-      printQRInTerminal: false,
-    });
-    setWhatsAppSocket(sock);
-
-    console.log("📱 CONTA CONECTADA:", sock.user);
-
-    sock.ev.on("creds.update", saveCreds);*/
-    }
-    //============================================================================================
     sock.ev.on("messages.upsert", async ({ messages }: { messages: any[] }) => {
       for (const message of messages) {
         if (!message.message) continue;
@@ -560,13 +526,13 @@ export class WhatsAppService {
     });
 
     sock.ev.on("connection.update", (update: any) => {
-      const { connection, lastDisconnect } = update;
+      const { connection, lastDisconnect, qr } = update;
 
-      //  if (qr) {
-      //    console.log("\n📱 Escaneie este QR Code com o WhatsApp:\n");
+      if (qr) {
+        console.log("\n📱 Escaneie este QR Code com o WhatsApp:\n");
 
-      //   qrcode.generate(qr, { small: true });
-      // }
+        qrcode.generate(qr, { small: true });
+      }
 
       if (connection === "open") {
         console.log("\n✅ WhatsApp conectado com sucesso!\n");
