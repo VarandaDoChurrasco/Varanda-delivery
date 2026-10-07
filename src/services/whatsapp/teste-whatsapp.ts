@@ -1,6 +1,6 @@
-import "dotenv/config";
-import { WhatsAppService } from "./whatsapp.service.js";
+//import "dotenv/config";
+//import { WhatsAppService } from "./whatsapp.service.js";
 
-const whatsapp = new WhatsAppService();
+//////const whatsapp = new WhatsAppService();
 
-whatsapp.iniciar();
+//whatsapp.iniciar();
