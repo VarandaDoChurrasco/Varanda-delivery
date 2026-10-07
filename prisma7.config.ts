@@ -15,7 +15,9 @@
 
 //=========================================================
 import "dotenv/config";
-import { defineConfig, env } from "prisma/config";
+import { defineConfig } from "prisma/config";
+
+const env = (globalThis as any).process?.env ?? {};
 
 export default defineConfig({
   schema: "prisma/schema.prisma",
@@ -23,6 +25,8 @@ export default defineConfig({
     path: "prisma/migrations",
   },
   datasource: {
-    url: env("DATABASE_URL"),
+    url:
+      env.DATABASE_URL ||
+      "postgresql://placeholder:placeholder@localhost:5432/placeholder",
   },
 });
