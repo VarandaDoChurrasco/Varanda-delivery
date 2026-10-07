@@ -38,6 +38,12 @@ export class WhatsAppService {
   private processarComandoBairroService: ProcessarComandoBairroService;
   private processarComandoStatusService: ProcessarComandoStatusService;
   private alterarMOdoAtendimentoIaService: AlterarModoAtendimentoService;
+  private qrCode: string | null = null;
+
+  public getQrCode(): string | null {
+    return this.qrCode;
+  }
+
   // private getClient = new getClientService();
   // private createClient = new CreateClientService();
 
@@ -59,6 +65,7 @@ export class WhatsAppService {
     this.processarComandoStatusService = new ProcessarComandoStatusService();
     this.alterarMOdoAtendimentoIaService = new AlterarModoAtendimentoService();
   }
+
   async iniciar() {
     const { state, saveCreds } = await useMultiFileAuthState(
       "./auth_info_baileys",
@@ -527,14 +534,22 @@ export class WhatsAppService {
 
     sock.ev.on("connection.update", (update: any) => {
       const { connection, lastDisconnect, qr } = update;
+      //=====================================================================
+      //  if (qr) {
+      // console.log("\n📱 Escaneie este QR Code com o WhatsApp:\n");
 
+      // qrcode.generate(qr, { small: true });
+      //  }
+      //=========================================================================================
       if (qr) {
-        console.log("\n📱 Escaneie este QR Code com o WhatsApp:\n");
+        this.qrCode = qr;
+
+        console.log("\n📱 Novo QR Code gerado.\n");
 
         qrcode.generate(qr, { small: true });
       }
-
       if (connection === "open") {
+        this.qrCode = null;
         console.log("\n✅ WhatsApp conectado com sucesso!\n");
       }
 
