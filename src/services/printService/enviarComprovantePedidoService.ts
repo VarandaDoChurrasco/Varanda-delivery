@@ -8,6 +8,9 @@ class EnviarComprovantePedidoService {
   async execute(pedido: any) {
     const sock = getWhatsAppSocket();
 
+    console.log("📱 SOCKET PARA ENVIO DO PEDIDO:", !!sock);
+    console.log("👤 USUÁRIO DO SOCKET:", sock?.user);
+
     const pdf = await this.gerarComprovantePedidoService.execute(pedido);
 
     const meuNumero = sock.user?.id?.split(":")[0];
@@ -21,6 +24,9 @@ class EnviarComprovantePedidoService {
     const administradorJid = `${meuNumero}@s.whatsapp.net`;
 
     console.log("📤 Enviando comprovante para:", administradorJid);
+
+    console.log("📤 ADMINISTRADOR JID:", administradorJid);
+    console.log("📄 PDF GERADO:", pdf?.length, "bytes");
 
     await sock.sendMessage(administradorJid, {
       document: pdf,

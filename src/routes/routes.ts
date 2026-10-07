@@ -50,6 +50,7 @@ import { getAllOrderController } from "../controllers/order/getAllOrderControlle
 import { DeleteCartItem } from "../controllers/car/DeleteCartItemController.js";
 import { TransferirAtendimento } from "../controllers/client/AtendimentoClientController.js";
 //import { ListarProdutosComAdicionaisController } from "../controllers/adicional/lostarProdutosAdicionaisController.js";
+import { GetOrderTodayController } from "../controllers/order/getOrderTodayController.js";
 
 //=============================================Quentinha=================================================
 import { OpcaoQuentinhaController } from "../controllers/quentinhaController/criarQuentinhaController.js";
@@ -176,5 +177,6 @@ router.post("/confirmOrder/:id/entregue", new entregueOrderController().handle);
 router.get("/getOrder/:id", new getOrderController().handle);
 
 router.get("/orderAll", new getAllOrderController().handle);
+router.get("/orderToday", new GetOrderTodayController().handle);
 
 export { router };

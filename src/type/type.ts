@@ -10,6 +10,7 @@ export interface GetClientRequest {
   nome: string | null;
   modoAtendimento: "IA" | "HUMANO";
   createdAt: Date;
+  humanoAte: Date | null;
   updatedAt: Date;
 }
 

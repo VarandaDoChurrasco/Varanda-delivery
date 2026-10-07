@@ -21,6 +21,7 @@ import { CadastrarRefrigeranteService } from "../refrigente/cadastrarRefrigerant
 import { ProcessarComandoRefrigeranteService } from "../refrigente/processarComandoRefrigeranteService.js";
 import { ProcessarComandoBairroService } from "../neighborhoodService/processarComandoBairroService.js";
 import { ProcessarComandoStatusService } from "../orderService/processarComandoStatusService.js";
+import { AlterarModoAtendimentoService } from "../clientService/alterarModoAtendimentoService.js";
 
 import { setWhatsAppSocket } from "../../lib/whatsappSocket.js";
 
@@ -36,6 +37,7 @@ export class WhatsAppService {
   private processarComandoRefrigeranteService: ProcessarComandoRefrigeranteService;
   private processarComandoBairroService: ProcessarComandoBairroService;
   private processarComandoStatusService: ProcessarComandoStatusService;
+  private alterarMOdoAtendimentoIaService: AlterarModoAtendimentoService;
   // private getClient = new getClientService();
   // private createClient = new CreateClientService();
 
@@ -55,6 +57,7 @@ export class WhatsAppService {
       new ProcessarComandoRefrigeranteService();
     this.processarComandoBairroService = new ProcessarComandoBairroService();
     this.processarComandoStatusService = new ProcessarComandoStatusService();
+    this.alterarMOdoAtendimentoIaService = new AlterarModoAtendimentoService();
   }
   async iniciar() {
     const { state, saveCreds } = await useMultiFileAuthState(
@@ -65,7 +68,7 @@ export class WhatsAppService {
       auth: state,
       printQRInTerminal: false,
     });
-    // setWhatsAppSocket(sock);
+    setWhatsAppSocket(sock);
 
     console.log("📱 CONTA CONECTADA:", sock.user);
 
@@ -206,11 +209,98 @@ export class WhatsAppService {
         // ==========================================
 
         if (ehMinhaConta) {
+          console.log("🔎 DEBUG ADMIN:", {
+            fromMe: message.key.fromMe,
+            remoteJid,
+            remoteJidAlt: message.key.remoteJidAlt,
+            meuNumero,
+            telefoneRemetente,
+            ehMinhaConta,
+          });
           //===============================================
           const textoAdmin =
             message.message.conversation ||
             message.message.extendedTextMessage?.text ||
             "";
+
+          console.log("👑 TEXTO ADMIN:", textoAdmin);
+
+          const textoNormalizado = textoAdmin
+            .trim()
+            .toLowerCase()
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "");
+          //=================Modo Ia ==============================================
+
+          {
+            /*}  if (textoNormalizado.startsWith("#ia")) {
+            try {
+              const partes = textoNormalizado.split(/\s+/);
+
+              if (partes.length !== 2) {
+                await sock.sendMessage(remoteJid, {
+                  text:
+                    "❌ Formato inválido.\n\n" +
+                    "Use:\n" +
+                    "*#ia 557781200350*",
+                });
+
+                continue;
+              }
+
+              const telefoneCliente = partes[1];
+
+              const cliente =
+                await this.getClientService.execute(telefoneCliente);
+
+              if (!cliente) {
+                await sock.sendMessage(remoteJid, {
+                  text:
+                    `❌ Não encontrei nenhum cliente com o telefone ` +
+                    `*${telefoneCliente}*.`,
+                });
+
+                continue;
+              }
+
+              if (cliente.modoAtendimento === "IA") {
+                await sock.sendMessage(remoteJid, {
+                  text:
+                    `🤖 O atendimento de *${cliente.nome}* ` +
+                    `já está com a Hélia.`,
+                });
+
+                continue;
+              }
+
+              await this.alterarMOdoAtendimentoIaService.voltarParaIA(
+                cliente.id,
+              );
+
+              await sock.sendMessage(remoteJid, {
+                text:
+                  `🤖 *Atendimento devolvido para a Hélia!*\n\n` +
+                  `👤 Cliente: ${cliente.nome}\n` +
+                  `📱 Telefone: ${cliente.telefone}\n` +
+                  `📌 Modo: IA`,
+              });
+
+              console.log(
+                `🤖 Atendimento de ${cliente.nome} devolvido para IA.`,
+              );
+            } catch (error) {
+              console.error("❌ Erro ao devolver atendimento para IA:", error);
+
+              await sock.sendMessage(remoteJid, {
+                text: "❌ Não consegui devolver o atendimento para a Hélia.",
+              });
+            }
+
+            continue;
+          }  */
+          }
+
+          //================= fim modo IA ==========================================
 
           const respostaBairro =
             await this.processarComandoBairroService.execute(textoAdmin);
@@ -222,6 +312,7 @@ export class WhatsAppService {
 
             continue;
           }
+
           const respostaRefrigerante =
             await this.processarComandoRefrigeranteService.execute(textoAdmin);
 
@@ -240,20 +331,22 @@ export class WhatsAppService {
             await sock.sendMessage(remoteJid, {
               text: respostaStatus,
             });
-
             continue;
           }
+
           //=======================================================
           //  const textoAdmin =
           //   message.message.conversation ||
           ///  message.message.extendedTextMessage?.text ||
           // "";
 
-          const textoNormalizado = textoAdmin
-            .trim()
-            .toLowerCase()
-            .normalize("NFD")
-            .replace(/[\u0300-\u036f]/g, "");
+          //===========================================
+          //  const textoNormalizado = textoAdmin
+          //    .trim()
+          //   .toLowerCase()
+          //  .normalize("NFD")
+          //  .replace(/[\u0300-\u036f]/g, "");
+          //========================================
 
           // ==========================================
           // CADASTRAR REFRIGERANTE
@@ -327,8 +420,9 @@ export class WhatsAppService {
 
             continue;
           }
-        }
+        } // <--- ESTA CHAVE FECHA O if (ehMinhaConta)
 
+        ///====================================fim modo ia ===========================
         if (message.key.fromMe) {
           continue;
         }
@@ -369,6 +463,33 @@ export class WhatsAppService {
             console.log("👤 Cliente encontrado:", cliente);
           }
           console.log("🤖 Hélia está processando...");
+          console.log("📩 TEXTO PROCESSADO PELA HÉLIA:", texto);
+
+          if (cliente.modoAtendimento === "HUMANO") {
+            // console.log(`👤 Atendimento humano para ${cliente.nome}.`);
+            //continue;
+            const agora = new Date();
+
+            // Atendimento humano ainda está dentro do prazo
+            if (cliente.humanoAte && cliente.humanoAte > agora) {
+              console.log(`👤 Atendimento humano para ${cliente.nome}.`);
+              console.log(`⏳ Atendimento humano até: ${cliente.humanoAte}`);
+              continue;
+            }
+
+            // Atendimento humano expirou
+            if (cliente.humanoAte && cliente.humanoAte <= agora) {
+              console.log(
+                `⏰ Atendimento humano expirou para ${cliente.nome}. Voltando para IA.`,
+              );
+
+              cliente = await this.alterarMOdoAtendimentoIaService.voltarParaIA(
+                cliente.id,
+              );
+
+              console.log(`🤖 Atendimento de ${cliente.nome} voltou para IA.`);
+            }
+          }
 
           const historico = this.historicos.get(remoteJid) || [];
 

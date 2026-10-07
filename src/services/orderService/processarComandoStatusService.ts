@@ -193,7 +193,7 @@ class ProcessarComandoStatusService {
         return "❌ Não foi possível atualizar o pedido.";
       }
     }
-
+    //===============================Entregue ========================================
     if (textoNormalizado.startsWith("#entregue ")) {
       const partes = textoNormalizado.split(/\s+/);
 
