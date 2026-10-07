@@ -85,7 +85,7 @@ export class WhatsAppService {
 
       setTimeout(async () => {
         try {
-          const code = await sock.requestPairingCode(phoneNumber, "Varanda");
+          const code = await sock.requestPairingCode(phoneNumber, "VARANDA1");
 
           console.log("\n====================================");
           console.log("🔐 CÓDIGO DE PAREAMENTO:", code);
