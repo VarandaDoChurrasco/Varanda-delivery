@@ -22,6 +22,7 @@ import { ProcessarComandoRefrigeranteService } from "../refrigente/processarComa
 import { ProcessarComandoBairroService } from "../neighborhoodService/processarComandoBairroService.js";
 import { ProcessarComandoStatusService } from "../orderService/processarComandoStatusService.js";
 import { AlterarModoAtendimentoService } from "../clientService/alterarModoAtendimentoService.js";
+import QRCode from "qrcode";
 
 import { setWhatsAppSocket } from "../../lib/whatsappSocket.js";
 
@@ -532,7 +533,7 @@ export class WhatsAppService {
       }
     });
 
-    sock.ev.on("connection.update", (update: any) => {
+    sock.ev.on("connection.update", async (update: any) => {
       const { connection, lastDisconnect, qr } = update;
       //=====================================================================
       //  if (qr) {
@@ -542,7 +543,8 @@ export class WhatsAppService {
       //  }
       //=========================================================================================
       if (qr) {
-        this.qrCode = qr;
+        //this.qrCode = qr;
+        this.qrCode = await QRCode.toDataURL(qr);
 
         console.log("\n📱 Novo QR Code gerado.\n");
 

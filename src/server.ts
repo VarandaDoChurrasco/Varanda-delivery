@@ -113,7 +113,7 @@ app.get("/whatsapp/qr", (_req, res) => {
         <p>Abra o WhatsApp → Dispositivos conectados → Conectar dispositivo</p>
 
         <img
-          src="https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(qr)}"
+           src="${qr}"
           alt="QR Code do WhatsApp"
         />
       </body>
