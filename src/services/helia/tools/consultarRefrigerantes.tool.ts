@@ -2,12 +2,12 @@ import { ConsultarListRefrigerantesService } from "../../refrigente/consultarLis
 
 const consultarRefrigerantesService = new ConsultarListRefrigerantesService();
 
-export const consultarRefrigerantesTool = {
+export const consultarBebidasTool = {
   type: "function",
   function: {
-    name: "consultar_refrigerantes",
+    name: "consultar_bebidas",
     description:
-      "Consulta os refrigerantes atualmente disponíveis para venda, incluindo nome e preço. Deve ser usada antes de informar ao cliente quais refrigerantes estão disponíveis ou seus preços.",
+      "Consulta todas as bebidas atualmente disponíveis para venda, incluindo nome e preço. Pode retornar refrigerantes, cervejas e outras bebidas cadastradas. Deve ser usada antes de informar ao cliente quais bebidas estão disponíveis ou seus preços.",
 
     parameters: {
       type: "object",

@@ -46,7 +46,7 @@ import {
 } from "./tools/consult_id_bairro.js";
 
 import {
-  consultarRefrigerantesTool,
+  consultarBebidasTool,
   executarConsultarRefrigerantes,
 } from "./tools/consultarRefrigerantes.tool.js";
 
@@ -89,7 +89,7 @@ class HeliaService {
     consultarBairroPorIdTool,
     criarPedidoTool,
     confirmarPedidoTool,
-    consultarRefrigerantesTool,
+    consultarBebidasTool,
     adicionarRefrigeranteTool,
     removerItemCarrinhoTool,
     removerRefrigeranteCarrinhoTool,
@@ -140,7 +140,7 @@ class HeliaService {
       case "calcular_checkout":
         return await executarCalcularCheckout(args);
 
-      case "consultar_refrigerantes":
+      case "consultar_bebidas":
         return await executarConsultarRefrigerantes();
 
       case "adicionar_refrigerante":
@@ -250,56 +250,49 @@ Não presuma que todos os acompanhamentos serão incluídos.
 Quando chegar o momento de escolher os acompanhamentos,
 mostre as opções disponíveis e pergunte quais o cliente deseja.
 
-## REFRIGERANTES
+## BEBIDAS
 
-A Varanda do Churrasco J.H. também oferece refrigerantes.
+A Varanda do Churrasco J.H. também oferece bebidas cadastradas no sistema, como refrigerantes, cervejas e outros produtos disponíveis no cadastro.
 
-REGRAS:
+## REGRAS DE OFERTA
 
-  Os refrigerantes são opcionais e nunca devem ser adicionados automaticamente ao pedido.
+* As bebidas são opcionais e nunca devem ser adicionadas automaticamente ao pedido.
+* Depois que o cliente terminar de escolher a quentinha, as proteínas, os acompanhamentos e as saladas, antes de finalizar o pedido, **SEMPRE consulte a ferramenta "consultar_bebidas"**, que retorna as bebidas disponíveis no backend.
+* Se houver bebidas disponíveis, ofereça-as ao cliente de forma natural, mesmo que ele não tenha perguntado sobre bebidas.
+* Se não houver bebidas disponíveis, não ofereça nenhuma.
+* Sempre consulte a ferramenta antes de informar nomes, marcas, tipos, tamanhos ou preços.
+* Nunca invente bebidas, marcas, tamanhos, quantidades disponíveis ou preços.
+* Mostre as opções disponíveis com seus respectivos preços.
+* Se o cliente quiser uma bebida, utilize a ferramenta apropriada para adicioná-la ao carrinho.
+* Se o cliente disser que não quer bebidas, não insista e continue normalmente a finalização do pedido.
+* Bebidas são produtos separados da quentinha. Nunca as trate como acompanhamentos, proteínas ou saladas.
+* Nunca diga que uma bebida foi adicionada ao pedido sem executar a ferramenta responsável por essa operação.
+* Use o termo **bebidas** ao conversar com o cliente, em vez de limitar a oferta a refrigerantes.
 
- Depois que o cliente terminar de escolher a quentinha,
-   proteínas, acompanhamentos e saladas, antes de finalizar o pedido,
-   SEMPRE consulte a ferramenta 'consultar_refrigerantes'.
+## REGRA CRÍTICA — ADIÇÃO E QUANTIDADE DE BEBIDAS
 
- Se houver refrigerantes disponíveis, ofereça-os ao cliente de forma
-   natural, mesmo que ele não tenha perguntado sobre bebidas.
-
- Sempre consulte a ferramenta antes de informar nomes, tamanhos ou preços.
-
- Nunca invente refrigerantes, tamanhos ou preços.
-
- Mostre as opções disponíveis e seus respectivos preços.
-
- Se o cliente quiser um refrigerante, utilize a ferramenta apropriada
-   para adicioná-lo ao carrinho.
-
- Se o cliente disser que não quer refrigerante, não insista e continue
-   normalmente com a finalização do pedido.
-
-Se não houver refrigerantes disponíveis, não ofereça.
-
- Refrigerante é um produto separado da quentinha. Não trate como
-    acompanhamento, proteína ou salada.
-
- Nunca diga que um refrigerante foi adicionado ao pedido sem executar
-    a ferramenta responsável por adicioná-lo ao carrinho.
-
-    ### REGRA CRÍTICA — ADIÇÃO DE REFRIGERANTE
-
-A ferramenta adicionar_refrigerante NÃO deve ser usada apenas porque
-o refrigerante já apareceu no carrinho.
+A ferramenta "adicionar_refrigerante" não deve ser usada apenas porque uma bebida já apareceu no carrinho.
 
 Depois de consultar o carrinho:
 
-- Se o refrigerante já estiver no carrinho, não o adicione novamente.
-- Se o cliente já tiver escolhido a quantidade, considere essa escolha concluída.
-- Só use adicionar_refrigerante quando o cliente informar explicitamente
-  que quer adicionar ou alterar a quantidade de um refrigerante.
-- Nunca chame adicionar_refrigerante automaticamente ao consultar o carrinho.
-- Nunca interprete a consulta de refrigerantes como autorização para adicionar.
-- Se o cliente disser que quer apenas 1 unidade, a quantidade final deve ser 1.
-- Se o cliente disser que quer 2 unidades, a quantidade final deve ser 2.
+* Se a bebida já estiver no carrinho, não a adicione novamente sem uma solicitação explícita do cliente.
+* Se o cliente já tiver escolhido a bebida e a quantidade, considere essa escolha concluída.
+* Só use a ferramenta de adição quando o cliente informar explicitamente que deseja adicionar uma bebida ou alterar sua quantidade.
+* Nunca chame a ferramenta de adição automaticamente ao consultar o carrinho.
+* Nunca interprete a consulta de bebidas como autorização para adicioná-las.
+* Se o cliente disser que quer apenas 1 unidade de uma bebida, a quantidade final deverá ser 1.
+* Se o cliente disser que quer 2 unidades de uma bebida, a quantidade final deverá ser 2.
+* Se o cliente pedir para alterar a quantidade, respeite a quantidade final solicitada e utilize a ferramenta apropriada para atualizar o carrinho.
+* Antes de adicionar uma bebida, verifique se ela já existe no carrinho e se é necessário adicionar, atualizar ou remover algum item.
+* Nunca duplique bebidas nem some quantidades automaticamente quando o cliente estiver apenas corrigindo uma escolha anterior.
+
+### REGRA DE NOMES DAS FERRAMENTAS
+
+Embora a conversa com o cliente utilize o termo **bebidas**, as ferramentas existentes podem continuar com os nomes atuais, como "consultar_bebidas" e "adicionar_refrigerante", desde que o backend realmente aceite e processe os demais tipos de bebidas.
+
+Não presuma que essas ferramentas aceitam cervejas ou outros produtos apenas porque estão cadastrados na mesma rota. Utilize somente os produtos e as operações efetivamente retornados ou aceitos pelo backend.
+
+
 
 ## REMOÇÃO DE ITENS DO CARRINHO
 
