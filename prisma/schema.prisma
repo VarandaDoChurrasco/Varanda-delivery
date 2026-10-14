@@ -62,6 +62,16 @@ model Refrigerante {
   @@unique([nome])
 }
 
+enum PeriodoCardapio {
+  ALMOCO
+  NOITE
+}
+
+enum TipoProduto {
+  QUENTINHA
+  SIMPLES
+}
+
 model Configuracao {
   id                    String   @id @default(uuid())
   telefoneAdministrador String?
@@ -70,8 +80,8 @@ model Configuracao {
 }
 
 model CardapioPendente {
-  id String @id @default(uuid())
-
+  id              String @id @default(uuid())
+  produtos        Json
   acompanhamentos Json
   proteinas       Json
   saladas         Json
@@ -147,22 +157,20 @@ model Categoria {
   ordem Int     @default(0)
   ativo Boolean @default(true)
 
-  produtos Produto[]
+  // produtos Produto[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 model Produto {
-  id         String  @id @default(uuid())
-  nome       String  @unique
+  id         String      @id @default(uuid())
+  nome       String      @unique
   descricao  String?
-  preco      Decimal @db.Decimal(10, 2)
-  disponivel Boolean @default(true)
-  ativo      Boolean @default(true)
-
-  categoriaId String
-  categoria   Categoria @relation(fields: [categoriaId], references: [id])
+  preco      Decimal     @db.Decimal(10, 2)
+  tipo       TipoProduto @default(SIMPLES)
+  disponivel Boolean     @default(true)
+  ativo      Boolean     @default(true)
 
   cardapios     CardapioItem[]
   adicionais    ProdutoAdicional[]
@@ -173,6 +181,24 @@ model Produto {
   updatedAt DateTime @updatedAt
 }
 
+/**
+ * model Produto {
+ * id         String  @id @default(uuid())
+ * nome       String  @unique
+ * descricao  String?
+ * preco      Decimal @db.Decimal(10, 2)
+ * disponivel Boolean @default(true)
+ * ativo      Boolean @default(true)
+ * categoriaId String
+ * categoria   Categoria @relation(fields: [categoriaId], references: [id])
+ * cardapios     CardapioItem[]
+ * adicionais    ProdutoAdicional[]
+ * carrinhoItens CarrinhoItem[]
+ * pedidoItens   PedidoItem[]
+ * createdAt DateTime @default(now())
+ * updatedAt DateTime @updatedAt
+ * }
+ */
 model ProdutoAdicional {
   produtoId   String
   adicionalId String
@@ -244,40 +270,60 @@ model CarrinhoRefrigerante {
 model CarrinhoItem {
   id String @id @default(uuid())
 
-  quantidade Int
-
+  quantidade    Int
   precoUnitario Decimal @db.Decimal(10, 2)
-
-  observacao String?
+  observacao    String?
 
   carrinhoId String
-  // produtoId  String
+  produtoId  String
+  tamanhoId  String?
 
-  tamanhoId String?
-  escolhas  CarrinhoItemEscolha[]
+  carrinho Carrinho @relation(fields: [carrinhoId], references: [id], onDelete: Cascade)
 
+  produto Produto @relation(fields: [produtoId], references: [id])
+
+  escolhas   CarrinhoItemEscolha[]
   adicionais CarrinhoItemAdicional[]
   remocoes   CarrinhoItemRemocao[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  carrinho  Carrinho @relation(fields: [carrinhoId], references: [id])
-  // produto  Produto  @relation(fields: [produtoId], references: [id])
-  produto   Produto? @relation(fields: [produtoId], references: [id])
-  produtoId String?
+  @@index([carrinhoId])
+  @@index([produtoId])
 }
 
+/**
+ * model CarrinhoItem {
+ * id String @id @default(uuid())
+ * quantidade Int
+ * precoUnitario Decimal @db.Decimal(10, 2)
+ * observacao String?
+ * carrinhoId String
+ * // produtoId  String
+ * tamanhoId String?
+ * escolhas  CarrinhoItemEscolha[]
+ * adicionais CarrinhoItemAdicional[]
+ * remocoes   CarrinhoItemRemocao[]
+ * createdAt DateTime @default(now())
+ * updatedAt DateTime @updatedAt
+ * carrinho  Carrinho @relation(fields: [carrinhoId], references: [id])
+ * // produto  Produto  @relation(fields: [produtoId], references: [id])
+ * produto   Produto? @relation(fields: [produtoId], references: [id])
+ * produtoId String?
+ * }
+ */
 model Cardapio {
   id                      String                   @id @default(uuid())
   data                    DateTime                 @db.Date
+  periodo                 PeriodoCardapio          @default(ALMOCO)
   ativo                   Boolean                  @default(true)
   itens                   CardapioItem[]
   createdAt               DateTime                 @default(now())
   updatedAt               DateTime                 @updatedAt
   cardapioOpcaoQuentinhas CardapioOpcaoQuentinha[]
 
-  @@unique([data])
+  @@unique([data, periodo])
 }
 
 model CardapioItem {
@@ -392,27 +438,48 @@ model PedidoItem {
   produtoNome   String
   quantidade    Int
   precoUnitario Decimal @db.Decimal(10, 2)
+  observacao    String?
 
-  observacao String?
+  pedidoId  String
+  produtoId String?
 
-  pedidoId String
+  pedido Pedido @relation(fields: [pedidoId], references: [id], onDelete: Cascade)
 
-  pedido     Pedido                @relation(fields: [pedidoId], references: [id])
+  produto Produto? @relation(fields: [produtoId], references: [id], onDelete: SetNull)
+
   adicionais PedidoItemAdicional[]
   escolhas   PedidoItemEscolha[]
   remocoes   PedidoItemRemocao[]
 
-  // pedido  Pedido  @relation(fields: [pedidoId], references: [id])
-  //produto Produto @relation(fields: [produtoId], references: [id])
-
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  //produto   Produto? @relation(fields: [produtoId], references: [id])
-  //produtoId String?
-  produto   Produto? @relation(fields: [produtoId], references: [id])
-  produtoId String?
+  @@index([pedidoId])
+  @@index([produtoId])
 }
+
+/**
+ * model PedidoItem {
+ * id String @id @default(uuid())
+ * produtoNome   String
+ * quantidade    Int
+ * precoUnitario Decimal @db.Decimal(10, 2)
+ * observacao String?
+ * pedidoId String
+ * pedido     Pedido                @relation(fields: [pedidoId], references: [id])
+ * adicionais PedidoItemAdicional[]
+ * escolhas   PedidoItemEscolha[]
+ * remocoes   PedidoItemRemocao[]
+ * // pedido  Pedido  @relation(fields: [pedidoId], references: [id])
+ * //produto Produto @relation(fields: [produtoId], references: [id])
+ * createdAt DateTime @default(now())
+ * updatedAt DateTime @updatedAt
+ * //produto   Produto? @relation(fields: [produtoId], references: [id])
+ * //produtoId String?
+ * produto   Produto? @relation(fields: [produtoId], references: [id])
+ * produtoId String?
+ * }
+ */
 
 model PedidoRefrigerante {
   id            String  @id @default(uuid())

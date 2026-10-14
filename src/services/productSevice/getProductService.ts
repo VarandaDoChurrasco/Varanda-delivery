@@ -2,6 +2,23 @@ import { prisma } from "../../lib/prisma.js";
 
 class getProductService {
   async execute() {
+    const getProduct = await prisma.produto.findMany({
+      orderBy: {
+        nome: "asc",
+      },
+    });
+
+    return getProduct;
+  }
+}
+
+export { getProductService };
+
+//========================================================
+/*import { prisma } from "../../lib/prisma.js";
+
+class getProductService {
+  async execute() {
     const produtos = await prisma.produto.findMany({
       orderBy: {
         nome: "asc",
@@ -15,4 +32,4 @@ class getProductService {
   }
 }
 
-export { getProductService };
+export { getProductService };*/
