@@ -150,38 +150,80 @@ export class WhatsAppService {
 
             let resposta = "";
 
-            if (
-              resultado.alertas.length > 0 &&
-              resultado.acompanhamentos.length === 0 &&
-              resultado.proteinas.length === 0 &&
-              resultado.saladas.length === 0
-            ) {
+            const temProdutos = resultado.produtos.length > 0;
+            const temOpcoesQuentinha =
+              resultado.proteinas.length > 0 ||
+              resultado.acompanhamentos.length > 0 ||
+              resultado.saladas.length > 0;
+
+            if (!temProdutos && !temOpcoesQuentinha) {
               resposta =
-                `⚠️ ${resultado.alertas.join("\n")}\n\n` +
-                `Envie uma foto do cardápio válido da Varanda do Churrasco J.H.`;
+                `⚠️ Não consegui identificar produtos ou opções ` +
+                `alimentares suficientes nessa imagem.\n\n` +
+                `Envie uma foto mais nítida do cardápio da Varanda do Churrasco J.H.`;
+
+              if (resultado.alertas.length > 0) {
+                resposta +=
+                  `\n\n⚠️ *Observações:*\n` +
+                  resultado.alertas.map((item) => `• ${item}`).join("\n");
+              }
             } else {
-              resposta =
-                `📋 *Cardápio identificado*\n\n` +
-                `🥩 *Proteínas:*\n` +
-                `${
-                  resultado.proteinas.length
-                    ? resultado.proteinas.map((item) => `• ${item}`).join("\n")
-                    : "Nenhuma identificada"
-                }\n\n` +
-                `🍚 *Acompanhamentos:*\n` +
-                `${
-                  resultado.acompanhamentos.length
-                    ? resultado.acompanhamentos
-                        .map((item) => `• ${item}`)
-                        .join("\n")
-                    : "Nenhum identificado"
-                }\n\n` +
-                `🥗 *Saladas:*\n` +
-                `${
-                  resultado.saladas.length
-                    ? resultado.saladas.map((item) => `• ${item}`).join("\n")
-                    : "Nenhuma identificada"
-                }\n\n` +
+              resposta = `📋 *Cardápio identificado*\n\n`;
+
+              // Produtos vendidos individualmente.
+              if (temProdutos) {
+                resposta += `🍽️ *Produtos e preços:*\n`;
+
+                resposta += resultado.produtos
+                  .map((produto) => {
+                    const preco =
+                      produto.preco !== null
+                        ? produto.preco.toLocaleString("pt-BR", {
+                            style: "currency",
+                            currency: "BRL",
+                          })
+                        : "Preço não identificado";
+
+                    let item = `• *${produto.nome}* — ${preco}`;
+
+                    if (produto.descricao) {
+                      item += `\n  ${produto.descricao}`;
+                    }
+
+                    return item;
+                  })
+                  .join("\n\n");
+
+                resposta += "\n\n";
+              }
+
+              // Opções de quentinha.
+              if (temOpcoesQuentinha) {
+                if (resultado.proteinas.length > 0) {
+                  resposta +=
+                    `🥩 *Proteínas:*\n` +
+                    resultado.proteinas.map((item) => `• ${item}`).join("\n") +
+                    "\n\n";
+                }
+
+                if (resultado.acompanhamentos.length > 0) {
+                  resposta +=
+                    `🍚 *Acompanhamentos:*\n` +
+                    resultado.acompanhamentos
+                      .map((item) => `• ${item}`)
+                      .join("\n") +
+                    "\n\n";
+                }
+
+                if (resultado.saladas.length > 0) {
+                  resposta +=
+                    `🥗 *Saladas:*\n` +
+                    resultado.saladas.map((item) => `• ${item}`).join("\n") +
+                    "\n\n";
+                }
+              }
+
+              resposta +=
                 `Deseja cadastrar este cardápio para hoje?\n` +
                 `Responda *SIM* para confirmar ou envie outra imagem.`;
 
