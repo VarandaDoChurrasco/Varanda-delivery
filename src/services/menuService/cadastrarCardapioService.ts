@@ -31,6 +31,24 @@ class CadastrarCardapioService {
 
       // Valida o conteúdo antes de modificar o cardápio existente.
       if (periodo === PeriodoCardapio.ALMOCO) {
+        await tx.produto.upsert({
+          where: {
+            nome: "Quentinha",
+          },
+          update: {
+            tipo: TipoProduto.QUENTINHA,
+            ativo: true,
+            disponivel: true,
+          },
+          create: {
+            nome: "Quentinha",
+            descricao: "Produto-base para montagem das quentinhas.",
+            preco: 0,
+            tipo: TipoProduto.QUENTINHA,
+            ativo: true,
+            disponivel: true,
+          },
+        });
         const totalOpcoes =
           acompanhamentos.length + proteinas.length + saladas.length;
 
