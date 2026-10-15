@@ -7,3 +7,7 @@ node_modules
 dist
 node_modules/
 .env
+# Credenciais e sessões do WhatsApp Baileys
+auth_info_baileys/
+auth_info/
+auth_info_sessoes/

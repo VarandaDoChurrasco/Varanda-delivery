@@ -15,6 +15,7 @@ export function emitirNovoPedido(pedido: unknown) {
   const clientesConectados = io.sockets.sockets.size;
 
   console.log("📊 Clientes Socket.IO conectados:", clientesConectados);
+  console.log("📤 Emitindo evento novo_pedido:", pedido);
 
   io.emit("novo_pedido", pedido);
 
