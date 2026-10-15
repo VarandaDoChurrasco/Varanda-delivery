@@ -54,6 +54,7 @@ class createPedidoService {
         cliente: true,
         itens: {
           include: {
+            produto: true, // Adicionado para acessar item.produto.nome
             adicionais: {
               include: {
                 adicional: true,
@@ -220,18 +221,23 @@ class createPedidoService {
 
           itens: {
             create: carrinho.itens.map((item) => {
-              const tamanho = tamanhos.find(
-                (tamanho) => tamanho.id === item.tamanhoId,
-              );
+              // Quentinhas possuem tamanho; produtos individuais não.
+              const tamanho = item.tamanhoId
+                ? tamanhos.find((tamanho) => tamanho.id === item.tamanhoId)
+                : null;
 
-              if (!tamanho) {
+              if (item.tamanhoId && !tamanho) {
                 throw new Error(
                   `Tamanho da quentinha não encontrado para o item ${item.id}.`,
                 );
               }
 
+              // Se houver tamanho, é uma quentinha.
+              // Caso contrário, usa o nome do produto individual.
+              const produtoNome = tamanho ? tamanho.nome : item.produto.nome;
+
               return {
-                produtoNome: tamanho.nome,
+                produtoNome,
                 quantidade: item.quantidade,
                 precoUnitario: item.precoUnitario,
                 observacao: item.observacao,
