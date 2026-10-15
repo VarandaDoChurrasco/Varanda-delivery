@@ -12,6 +12,10 @@ export function emitirNovoPedido(pedido: unknown) {
     return;
   }
 
+  const clientesConectados = io.sockets.sockets.size;
+
+  console.log("📊 Clientes Socket.IO conectados:", clientesConectados);
+
   io.emit("novo_pedido", pedido);
 
   console.log("📡 Novo pedido enviado para o VarandaPrint.");

@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { confirmOrderService } from "../../services/orderService/confirmOrderService.js";
 import { gerarTextoImpressao } from "../../formatadorImpressao.js";
+import { emitirNovoPedido } from "../../lib/socket.js";
 
 class confirmOrderController {
   async handle(req: Request, res: Response) {
@@ -20,6 +21,12 @@ class confirmOrderController {
 
       // 2. Gera o texto formatado do comprovante a partir do pedido
       const textoComprovante = gerarTextoImpressao(pedido);
+
+      console.log(
+        `🟡 Controller: emitindo pedido #${pedido.numero} para o VarandaPrint...`,
+      );
+
+      emitirNovoPedido(pedido);
 
       // 3. IP do telemóvel onde o Termux está a rodar o servidor Express
       const TERMUX_PRINT_URL = "http://192.168.1.6:3000/imprimir";

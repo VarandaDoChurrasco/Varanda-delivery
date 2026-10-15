@@ -1,6 +1,6 @@
 import { confirmOrderService } from "../../orderService/confirmOrderService.js";
 import { EnviarComprovantePedidoService } from "../../printService/enviarComprovantePedidoService.js";
-import { emitirNovoPedido } from "../../../lib/socket.js";
+//import { emitirNovoPedido } from "../../../lib/socket.js";
 
 const pedidoService = new confirmOrderService();
 const enviarComprovante = new EnviarComprovantePedidoService();
@@ -43,9 +43,9 @@ export async function executarConfirmarPedido(args: { pedidoId: string }) {
     pedido.numero,
   );
 
-  console.log("🟡 CONFIRMAR_PEDIDO: chamando emitirNovoPedido...");
+  //console.log("🟡 CONFIRMAR_PEDIDO: chamando emitirNovoPedido...");
 
-  emitirNovoPedido(pedido);
+  //emitirNovoPedido(pedido);
 
   console.log(
     `✅ Pedido #${pedido.numero} confirmado. Status: ${pedido.status}`,
