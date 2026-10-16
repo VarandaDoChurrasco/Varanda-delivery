@@ -26,7 +26,7 @@ class confirmOrderController {
         `🟡 Controller: emitindo pedido #${pedido.numero} para o VarandaPrint...`,
       );
 
-      emitirNovoPedido(pedido);
+      // emitirNovoPedido(pedido);
 
       // 3. IP do telemóvel onde o Termux está a rodar o servidor Express
       const TERMUX_PRINT_URL = "http://192.168.1.6:3000/imprimir";
