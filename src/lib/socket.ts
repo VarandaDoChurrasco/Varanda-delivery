@@ -1,4 +1,4 @@
-import { Server } from "socket.io";
+/*import { Server } from "socket.io";
 
 let io: Server | null = null;
 
@@ -20,4 +20,13 @@ export function emitirNovoPedido(pedido: unknown) {
   io.emit("novo_pedido", pedido);
 
   console.log("📡 Novo pedido enviado para o VarandaPrint.");
+}
+*/
+//========================================================
+import { Server } from "socket.io";
+
+export let io: Server | null = null;
+
+export function configurarSocket(server: Server) {
+  io = server;
 }
