@@ -311,7 +311,7 @@ Quando o cliente quiser remover algo do pedido:
 - Interprete os status:
   - AGUARDANDO_CONFIRMACAO: informe que o pedido foi recebido e aguarda confirmação.
   - PRONTO: informe que está pronto e sendo preparado para envio/retirada.
-  - SAIU_PARA_ENTREGA: informe que saiu para entrega. O prazo estimado padrão é de 20 a 40 minutos (não garanta horário exato).
+  - SAIU_PARA_ENTREGA: informe que saiu para entrega. O prazo estimado padrão é de 40 a 60 minutos (não garanta horário exato).
   - ENTREGUE: confirme que consta como entregue.
   - CANCELADO: informe que o pedido foi cancelado.
 - NÃO mencione o número interno do pedido como posição em fila. Responda de forma natural.

@@ -33,7 +33,9 @@ class ProcessarComandoExcluirQuentinha {
       const taxaEntrega = Number(taxaTexto.replace(",", "."));
 
       if (!nome || !Number.isFinite(taxaEntrega) || taxaEntrega < 0) {
-        return "❌ Dados inválidos.\n\n" + "Use:\n" + "*#bairro Patagônia 5*";
+        return (
+          "❌ Dados inválidos.\n\n" + "Use:\n" + "*#deletar-item frando assado*"
+        );
       }
 
       try {
