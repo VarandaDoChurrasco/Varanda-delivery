@@ -56,6 +56,7 @@ import { GetOrderTodayController } from "../controllers/order/getOrderTodayContr
 import { OpcaoQuentinhaController } from "../controllers/quentinhaController/criarQuentinhaController.js";
 import { CarrinhoItemEscolhaController } from "../controllers/quentinhaController/itemCarrinhoQuentinhaController.js";
 import { tamanhoQuentinhaController } from "../controllers/quentinhaController/tamanhoQuentinhaController.js";
+import { excluirOpçaoQuentinhaController } from "../controllers/quentinhaController/excluirOpçaoQuentinhaController.js";
 
 //===========================================Refrigerantes=======================================================
 import { CadastrarRefrigeranteController } from "../controllers/refrigentesController/cadastrarRefrigeranteController.js";
@@ -113,6 +114,7 @@ router.delete("/quentinha/:id", new CarrinhoItemEscolhaController().excluir);
 
 //====================================Tamanho e valores dequentinha========================
 router.post("/tamanho-quentinha", new tamanhoQuentinhaController().create);
+router.post("deletar-quentinha", new excluirOpçaoQuentinhaController().excluir);
 
 // =====================Rotas de Clientes==================================================
 router.post("/clients", (req, res) => createClientController.handle(req, res));

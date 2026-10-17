@@ -58,6 +58,7 @@ export async function executarConfirmarPedido(args: { pedidoId: string }) {
 
   console.log(
     `✅ Pedido #${pedido.numero} confirmado. Status: ${pedido.status}`,
+    //===================
   );
 
   // 2. Envia o comprovante para o administrador

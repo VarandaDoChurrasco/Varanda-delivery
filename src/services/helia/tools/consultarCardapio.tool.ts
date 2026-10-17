@@ -10,7 +10,7 @@ export const consultarCardapioTool = {
 
     description:
       "Consulta o cardápio correspondente ao horário atual. " +
-      "Antes das 15h, consulta o cardápio de almoço e as regras " +
+      "Antes das 14:30h, consulta o cardápio de almoço e as regras " +
       "de montagem das quentinhas. A partir das 15h, consulta " +
       "o cardápio da noite, incluindo os produtos disponíveis, " +
       "suas categorias e preços. Use sempre esta ferramenta " +

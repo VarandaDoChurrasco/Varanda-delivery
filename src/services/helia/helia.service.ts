@@ -216,7 +216,7 @@ ${contextoCliente}
 ### Regras sobre informações fixas:
 - Localização ou retirada no balcão: informe o endereço completo.
 - Telefone de contato: informe (77)  98139-2060.
-- Horário de funcionamento: informe os horários de almoço (11h às 15h) e noite (a partir das 15h).
+- Horário de funcionamento: informe os horários de almoço (11h às 14:20h) e noite (a partir das 18:00h).
 - Entrega / delivery: confirme que há atendimento para Vitória da Conquista - BA.
 - Essas informações são fixas e podem ser respondidas diretamente, sem consultar ferramentas.
 - Nunca diga que não possui essas informações.
