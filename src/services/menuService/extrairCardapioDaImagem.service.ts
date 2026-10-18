@@ -49,11 +49,32 @@ O restaurante trabalha com três formatos de refeições:
 - Não cadastre Jantinha P e Jantinha M no array produtos.
 - O sistema cadastra os dois tamanhos separadamente.
 
+
 3. PRODUTOS INDIVIDUAIS
 - São pratos vendidos separadamente, como lasanha,
   espaguete, sopa de aipim, batata recheada e escondidinho.
 - Cada produto deve ter seu nome e preço quando visível.
-- Não invente ingredientes, preços ou descrições.
+- Extraia também TODOS os sabores, recheios, ingredientes
+  inclusos e outras características descritas na imagem.
+- Essas informações devem ser registradas no campo "descricao".
+- Quando houver sabores, use o formato:
+  "Sabores: Camarão, Carne moída, Calabresa".
+- Quando houver ingredientes inclusos, use o formato:
+  "Ingredientes inclusos: Bacon, Cheddar, Cream cheese".
+- Se uma lista de sabores for compartilhada por vários produtos,
+  registre a lista completa na descrição de CADA produto
+  ao qual ela se aplica.
+- Quando a imagem disser "mesmos sabores", identifique
+  a lista à qual essa expressão se refere e copie os sabores
+  para a descrição do produto correspondente.
+- Só associe uma lista de sabores a um produto quando essa
+  relação estiver clara na imagem.
+- Não confunda sabores de produtos individuais com proteínas
+  e acompanhamentos usados na montagem das jantinhas.
+- Não invente sabores, ingredientes, preços ou descrições.
+- Se houver dúvida sobre quais sabores pertencem a um
+  produto, registre essa dúvida em "alertas".
+
 
 REGRAS OBRIGATÓRIAS:
 
@@ -71,6 +92,14 @@ REGRAS OBRIGATÓRIAS:
 12. Se uma categoria não tiver itens, retorne um array vazio.
 13. Não acrescente produtos apenas porque são exemplos deste prompt.
 14. Retorne somente JSON válido, sem markdown.
+15. Nunca descarte sabores, recheios ou ingredientes
+    que estejam legíveis na imagem.
+
+16. Quando vários produtos compartilharem os mesmos
+    sabores, repita a lista na descricao de cada produto.
+
+17. Não utilize descricao: null quando houver informações
+    legíveis sobre sabores ou ingredientes daquele produto.
 
 FORMATO OBRIGATÓRIO:
 
