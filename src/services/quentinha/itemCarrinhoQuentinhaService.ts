@@ -204,6 +204,7 @@ export class CarrinhoItemEscolhaService {
         cardapioId: itemCardapio.cardapioId,
         opcaoId,
         tipo,
+        disponivel: true,
       },
       include: {
         opcao: true,
