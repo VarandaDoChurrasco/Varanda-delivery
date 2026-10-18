@@ -10,6 +10,7 @@ class GetMenuService {
       month: "2-digit",
       day: "2-digit",
       hour: "2-digit",
+      minute: "2-digit",
       hourCycle: "h23",
     }).formatToParts(new Date());
 
@@ -20,13 +21,15 @@ class GetMenuService {
     const mes = Number(obterParte("month"));
     const dia = Number(obterParte("day"));
     const hora = Number(obterParte("hour"));
+    const minuto = Number(obterParte("minute"));
 
     // O campo Prisma usa @db.Date.
     // Criamos a data sem depender do fuso horário do servidor.
     const dataHoje = new Date(Date.UTC(ano, mes - 1, dia));
 
-    const periodo = hora < 15 ? "ALMOCO" : "NOITE";
-
+    //const periodo = hora < 15 ? "ALMOCO" : "NOITE";
+    const periodo =
+      hora < 14 || (hora === 14 && minuto < 30) ? "ALMOCO" : "NOITE";
     // A partir das 15h, desativa o cardápio do almoço de hoje.
     // Não apaga os registros do banco.
     if (periodo === "NOITE") {
@@ -94,34 +97,36 @@ class GetMenuService {
 
     // Produtos individuais cadastrados no CardapioItem.
     const produtos = cardapio.itens
-      .filter((item) => item.produto.tipo === "SIMPLES")
+      .filter(
+        (item) =>
+          item.produto.tipo === "SIMPLES" ||
+          (periodo === "NOITE" &&
+            ["Jantinha P", "Jantinha M"].includes(item.produto.nome)),
+      )
       .map((item) => ({
         id: item.produto.id,
         nome: item.produto.nome,
         descricao: item.produto.descricao,
         preco: Number(item.preco),
       }));
-
     // No almoço, disponibiliza os tamanhos de quentinha
     // e as opções para montar o prato.
     const acompanhamentos: { id: string; nome: string }[] = [];
     const proteinas: { id: string; nome: string }[] = [];
     const saladas: { id: string; nome: string }[] = [];
 
-    if (periodo === "ALMOCO") {
-      for (const item of cardapio.cardapioOpcaoQuentinhas) {
-        const opcao = {
-          id: item.opcao.id,
-          nome: item.opcao.nome,
-        };
+    for (const item of cardapio.cardapioOpcaoQuentinhas) {
+      const opcao = {
+        id: item.opcao.id,
+        nome: item.opcao.nome,
+      };
 
-        if (item.tipo === "ACOMPANHAMENTO") {
-          acompanhamentos.push(opcao);
-        } else if (item.tipo === "PROTEINA") {
-          proteinas.push(opcao);
-        } else if (item.tipo === "SALADA") {
-          saladas.push(opcao);
-        }
+      if (item.tipo === "ACOMPANHAMENTO") {
+        acompanhamentos.push(opcao);
+      } else if (item.tipo === "PROTEINA") {
+        proteinas.push(opcao);
+      } else if (item.tipo === "SALADA") {
+        saladas.push(opcao);
       }
     }
 

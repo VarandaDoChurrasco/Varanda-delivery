@@ -91,8 +91,17 @@ class CreateCartItemService {
     }
 
     // 5. Procura o produto que representa a quentinha
+    /// const produtoQuentinha = await prisma.produto.findFirst({
+    //where: {
+    ///    tipo: "QUENTINHA",
+    //    ativo: true,
+    //  disponivel: true,
+    // },
+    // });
+
     const produtoQuentinha = await prisma.produto.findFirst({
       where: {
+        nome: "Quentinha",
         tipo: "QUENTINHA",
         ativo: true,
         disponivel: true,

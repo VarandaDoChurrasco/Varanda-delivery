@@ -82,6 +82,11 @@ import {
   executarAdicionarProduto,
 } from "./tools/adicionarProduto.tool.js";
 
+import {
+  adicionarJantinhaTool,
+  executarAdicionarJantinha,
+} from "./tools/adicionarJantinha.tool.js";
+
 class HeliaService {
   private deepSeekService: DeepSeekService;
   private tools = [
@@ -102,6 +107,7 @@ class HeliaService {
     cancelarPedidoTool,
     transferirParaHumanoTool,
     adicionarProdutoTool,
+    adicionarJantinhaTool,
   ];
 
   constructor() {
@@ -119,6 +125,8 @@ class HeliaService {
 
       case "transferir_para_humano":
         return await executarTransferirParaHumano(args);
+      case "adicionar_jantinha":
+        return await executarAdicionarJantinha(args);
 
       case "consultar_status_pedido":
         return await executarConsultarStatusPedido(args);
@@ -237,7 +245,7 @@ ${contextoCliente}
 ## REGRAS GERAIS DE ATENDIMENTO
 - Nunca invente produtos, opções, acompanhamentos, ingredientes ou preços.
 - Sempre consulte "consultar_cardapio" antes de informar preços, produtos ou disponibilidade. O cardápio muda diariamente.
-- O cardápio possui dois períodos: ALMOCO (antes das 15h) e NOITE (a partir das 19h). Respeite estritamente o período e os produtos retornados por "consultar_cardapio".
+- O cardápio possui dois períodos: ALMOCO (antes das 14:30h) e NOITE (a partir das 19h). Respeite estritamente o período e os produtos retornados por "consultar_cardapio".
 - Faça apenas uma pergunta por vez para não sobrecarregar o cliente.
 - Use mensagens curtas, claras e simpáticas. Emojis com moderação.
 - Nunca diga que é uma inteligência artificial ou um robô.
@@ -249,13 +257,29 @@ ${contextoCliente}
 - O cardápio de almoço, composto por quentinhas, é válido antes das 15h.
 - A partir das 15h, o atendimento passa a seguir o fluxo de produtos individuais, utilizando "adicionar_produto" quando houver produtos disponíveis.
 - O cardápio da noite fica pronto e disponível para consulta **somente a partir das 19h**.
-- Entre 15h e 18h59, se o cliente perguntar pelo cardápio da noite, pelo que tem disponível à noite ou quiser fazer um pedido do cardápio noturno, informe com simpatia que o cardápio da noite estará pronto a partir das 19h.
+- Entre 14:30h e 18h59, se o cliente perguntar pelo cardápio da noite, pelo que tem disponível à noite ou quiser fazer um pedido do cardápio noturno, informe com simpatia que o cardápio da noite estará pronto a partir das 19h.
 - Sugestão de resposta nesse período:
   "O cardápio da noite fica pronto a partir das 19h 😊 Pode me chamar nesse horário que te passo as opções!"
 - Antes das 19h, **não apresente, não invente e não confirme a disponibilidade de itens do cardápio noturno**.
 - A partir das 19h, consulte "consultar_cardapio" para obter as opções disponíveis antes de informar produtos, preços ou aceitar pedidos do cardápio noturno.
 - Não confunda o horário de início do atendimento de produtos individuais (15h) com o horário em que o cardápio noturno fica pronto (19h).
 - Considere o horário local do estabelecimento para aplicar essas regras.
+
+
+# JANTINHA — CARDÁPIO NOTURNO
+
+Quando consultar_cardapio retornar periodo NOITE:
+
+- Ofereça somente os produtos disponíveis no cardápio noturno.
+- Jantinha P permite escolher até 1 proteína.
+- Jantinha M permite escolher até 2 proteínas.
+- Consulte as proteínas, acompanhamentos e saladas disponíveis.
+- Utilize adicionar_jantinha para criar a jantinha no carrinho.
+- Depois utilize adicionar_escolha para registrar cada escolha.
+- Utilize os IDs retornados pelas ferramentas.
+- Nunca utilize adicionar_quentinha para cadastrar jantinha.
+- Não invente produtos, preços ou acompanhamentos.
+- Só confirme o pedido depois de registrar todos os itens corretamente.
 
 ## FLUXO DO CARRINHO E ESCOLHA DE FERRAMENTAS
 Para adicionar qualquer item (quentinha, produto ou bebida), você precisa do "carrinhoId":

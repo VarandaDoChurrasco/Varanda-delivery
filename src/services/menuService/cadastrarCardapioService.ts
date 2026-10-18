@@ -58,9 +58,16 @@ class CadastrarCardapioService {
           );
         }
       } else {
-        if (produtos.length === 0) {
+        //if (produtos.length === 0) {
+        //  throw new Error(
+        //   "O cardápio noturno não possui produtos individuais.",
+        // );
+        //}
+        const temJantinha = acompanhamentos.length > 0 && proteinas.length > 0;
+
+        if (produtos.length === 0 && !temJantinha) {
           throw new Error(
-            "O cardápio noturno não possui produtos individuais.",
+            "O cardápio noturno não possui produtos nem jantinha.",
           );
         }
 
@@ -154,10 +161,12 @@ class CadastrarCardapioService {
           });
         }
       } else {
+        // CARDÁPIO DA NOITE
+
+        // 1. Cadastra os produtos individuais
         for (let i = 0; i < produtos.length; i++) {
           const produtoExtraido = produtos[i];
 
-          // A validação acima garante que o preço não seja null.
           const preco = produtoExtraido.preco!;
 
           const produto = await tx.produto.upsert({
@@ -185,11 +194,100 @@ class CadastrarCardapioService {
             data: {
               cardapioId: cardapio.id,
               produtoId: produto.id,
-              preco: produtoExtraido.preco!,
+              preco,
               disponivel: true,
               ordem: i,
             },
           });
+        }
+
+        // 2. Cadastra as opções da jantinha
+        const opcoesJantinha = [
+          ...acompanhamentos.map((nome) => ({
+            nome,
+            tipo: TipoOpcaoQuentinha.ACOMPANHAMENTO,
+          })),
+          ...proteinas.map((nome) => ({
+            nome,
+            tipo: TipoOpcaoQuentinha.PROTEINA,
+          })),
+          ...saladas.map((nome) => ({
+            nome,
+            tipo: TipoOpcaoQuentinha.SALADA,
+          })),
+        ];
+
+        if (opcoesJantinha.length > 0) {
+          for (let i = 0; i < opcoesJantinha.length; i++) {
+            const opcao = opcoesJantinha[i];
+
+            const opcaoSalva = await tx.opcaoQuentinha.upsert({
+              where: {
+                nome: opcao.nome,
+              },
+              update: {
+                tipo: opcao.tipo,
+                ativo: true,
+                disponivel: true,
+              },
+              create: {
+                nome: opcao.nome,
+                tipo: opcao.tipo,
+                ativo: true,
+                disponivel: true,
+              },
+            });
+
+            await tx.cardapioOpcaoQuentinha.create({
+              data: {
+                cardapioId: cardapio.id,
+                opcaoId: opcaoSalva.id,
+                tipo: opcao.tipo,
+                disponivel: true,
+                ordem: i,
+              },
+            });
+          }
+
+          // 3. Cadastra os dois preços da jantinha
+          const jantinhas = [
+            { nome: "Jantinha P", preco: 15 },
+            { nome: "Jantinha M", preco: 20 },
+          ];
+
+          for (let i = 0; i < jantinhas.length; i++) {
+            const jantinha = jantinhas[i];
+
+            const produto = await tx.produto.upsert({
+              where: {
+                nome: jantinha.nome,
+              },
+              update: {
+                preco: jantinha.preco,
+                tipo: TipoProduto.QUENTINHA,
+                ativo: true,
+                disponivel: true,
+              },
+              create: {
+                nome: jantinha.nome,
+                descricao: "Jantinha com opções de montagem",
+                preco: jantinha.preco,
+                tipo: TipoProduto.QUENTINHA,
+                ativo: true,
+                disponivel: true,
+              },
+            });
+
+            await tx.cardapioItem.create({
+              data: {
+                cardapioId: cardapio.id,
+                produtoId: produto.id,
+                preco: jantinha.preco,
+                disponivel: true,
+                ordem: produtos.length + i,
+              },
+            });
+          }
         }
       }
 
@@ -200,15 +298,24 @@ class CadastrarCardapioService {
         },
       });
 
+      //    return {
+      //    cardapioId: cardapio.id,
+      //    data: hoje,
+      //   periodo,
+      //   produtos: periodo === PeriodoCardapio.NOITE ? produtos : [],
+      //  acompanhamentos:
+      //  periodo === PeriodoCardapio.ALMOCO ? acompanhamentos : [],
+      // proteinas: periodo === PeriodoCardapio.ALMOCO ? proteinas : [],
+      //  saladas: periodo === PeriodoCardapio.ALMOCO ? saladas : [],
+      //  };
       return {
         cardapioId: cardapio.id,
         data: hoje,
         periodo,
         produtos: periodo === PeriodoCardapio.NOITE ? produtos : [],
-        acompanhamentos:
-          periodo === PeriodoCardapio.ALMOCO ? acompanhamentos : [],
-        proteinas: periodo === PeriodoCardapio.ALMOCO ? proteinas : [],
-        saladas: periodo === PeriodoCardapio.ALMOCO ? saladas : [],
+        acompanhamentos,
+        proteinas,
+        saladas,
       };
     });
   }

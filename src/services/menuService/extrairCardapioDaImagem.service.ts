@@ -1,14 +1,5 @@
 import { DeepSeekService } from "../helia/deepseek.service.js";
 
-/*export type CardapioExtraido = {
-  acompanhamentos: string[];
-  proteinas: string[];
-  saladas: string[];
-  alertas: string[];
-};
-*/
-//================================================
-
 export type ProdutoExtraido = {
   nome: string;
   preco: number | null;
@@ -36,52 +27,50 @@ class ExtrairCardapioDaImagemService {
     }
 
     const prompt = `
-Você é responsável por interpretar imagens dos cardápios
-do restaurante Varanda do Churrasco J.H.
+Você interpreta imagens dos cardápios do restaurante
+Varanda do Churrasco J.H.
 
-Sua tarefa é ler a imagem e identificar todos os itens
-comerciais e as opções alimentares apresentados no cardápio.
+Extraia apenas informações que estejam presentes na imagem.
 
-O restaurante possui dois tipos de cardápio:
+O restaurante trabalha com três formatos de refeições:
 
-1. QUENTINHAS:
-   - acompanhamentos
-   - proteínas
-   - saladas
-   - tamanhos e preços das quentinhas, quando estiverem legíveis
+1. QUENTINHAS DO ALMOÇO
+- São montadas com proteínas, acompanhamentos e saladas.
+- Existem tamanhos e preços próprios.
+- As opções de montagem devem ser separadas por categoria.
+- Não transforme cada proteína em um produto individual.
 
-2. PRODUTOS INDIVIDUAIS:
-   - pratos e alimentos vendidos individualmente,
-     como lasanha, sopa de aipim e outros produtos
-   - preço de cada produto, somente quando estiver claramente indicado
-   - descrição do produto, somente quando estiver escrita na imagem
+2. JANTINHAS DA NOITE
+- Também são montadas com proteínas, acompanhamentos e saladas.
+- Jantinha P: R$ 15,00, até 1 proteína.
+- Jantinha M: R$ 20,00, até 2 proteínas.
+- As proteínas não possuem preços individuais por tipo de carne.
+- Não transforme cada proteína ou salada em produto individual.
+- Não cadastre Jantinha P e Jantinha M no array produtos.
+- O sistema cadastra os dois tamanhos separadamente.
+
+3. PRODUTOS INDIVIDUAIS
+- São pratos vendidos separadamente, como lasanha,
+  espaguete, sopa de aipim, batata recheada e escondidinho.
+- Cada produto deve ter seu nome e preço quando visível.
+- Não invente ingredientes, preços ou descrições.
 
 REGRAS OBRIGATÓRIAS:
 
-1. NÃO invente itens, preços, ingredientes ou descrições.
-2. NÃO altere os nomes dos itens sem necessidade.
-3. NÃO transforme acompanhamentos, proteínas ou saladas
-   em produtos individuais sem evidência na imagem.
-4. Itens apresentados como opções para montar uma quentinha
-   devem ficar nas categorias acompanhamentos, proteinas ou saladas.
-5. Alimentos apresentados como pratos ou produtos vendidos
-   individualmente devem entrar no array produtos.
-6. NÃO considere os valores dos tamanhos das quentinhas
-   como preços de produtos individuais.
-7. Ignore logotipos, slogans, propagandas e textos institucionais.
-8. Ignore imagens decorativas que não permitam identificar um item.
-9. Se um produto estiver claramente identificado, mas seu preço
-   não estiver visível, use null no campo preco.
-10. Se uma descrição não estiver informada, use null no campo descricao.
-11. Se uma categoria não tiver itens identificáveis,
-    retorne um array vazio.
-12. Se algum texto estiver ilegível ou houver dúvida,
-    NÃO tente adivinhar. Registre a dúvida em alertas.
-13. Evite cadastrar o mesmo item mais de uma vez na mesma categoria.
-14. Preserve os nomes conforme aparecem na imagem.
-15. Retorne SOMENTE JSON válido.
-16. NÃO use markdown.
-17. NÃO coloque texto antes ou depois do JSON.
+1. Não invente produtos, ingredientes ou preços.
+2. Preserve os nomes conforme aparecem na imagem.
+3. Não transforme opções de montagem em produtos individuais.
+4. Não utilize o preço de uma jantinha como preço de uma proteína.
+5. Não utilize preços de quentinhas como preços de produtos individuais.
+6. Retorne proteínas, acompanhamentos e saladas em arrays separados.
+7. Quando não houver preço legível de um produto, utilize null.
+8. Quando não houver descrição, utilize null.
+9. Não inclua imagens decorativas, propagandas ou logotipos.
+10. Se houver texto ilegível, registre em alertas.
+11. Não repita itens dentro da mesma categoria.
+12. Se uma categoria não tiver itens, retorne um array vazio.
+13. Não acrescente produtos apenas porque são exemplos deste prompt.
+14. Retorne somente JSON válido, sem markdown.
 
 FORMATO OBRIGATÓRIO:
 
@@ -99,115 +88,13 @@ FORMATO OBRIGATÓRIO:
   "alertas": []
 }
 
-O campo preco deve ser um número, sem símbolo de moeda,
-ou null quando o preço não estiver claramente informado.
-
+O campo preco deve ser um número ou null.
 O campo descricao deve ser uma string ou null.
-
-Os arrays acompanhamentos, proteinas e saladas devem conter
-somente strings com os nomes dos itens.
+Os arrays de acompanhamentos, proteínas e saladas
+devem conter somente strings.
 
 Se não houver produtos individuais, retorne "produtos": [].
 `;
-
-    //==================================================================================
-    /* const prompt = `
-Você é responsável por interpretar imagens de cardápios
-do restaurante Varanda do Churrasco J.H.
-
-Sua tarefa é ler a imagem e identificar os itens do cardápio.
-
-Classifique os itens SOMENTE nestas categorias:
-
-- acompanhamentos
-- proteinas
-- saladas
-
-REGRAS OBRIGATÓRIAS:
-
-1. NÃO invente nenhum item.
-2. NÃO invente preços.
-3. NÃO invente ingredientes.
-4. NÃO altere os nomes dos itens sem necessidade.
-5. Ignore logotipo.
-6. Ignore slogans.
-7. Ignore frases de propaganda.
-8. Ignore textos institucionais.
-9. Ignore imagens decorativas.
-10. "Marmitas 15 | 20 | 26" NÃO é uma lista de produtos.
-11. Não coloque os preços das marmitas em nenhuma categoria.
-12. Se uma categoria não tiver itens claramente identificáveis,
-    retorne um array vazio.
-13. Se algum texto estiver ilegível ou houver dúvida,
-    NÃO tente adivinhar.
-14. Quando houver dúvida, coloque a dúvida no array "alertas".
-15. Retorne SOMENTE JSON válido.
-16. Não use markdown.
-17. Não coloque texto antes ou depois do JSON.
-
-Formato obrigatório:
-
-{
-  "acompanhamentos": [],
-  "proteinas": [],
-  "saladas": [],
-  "alertas": []
-}
-`;   */
-    //======================================================
-
-    /*   const resposta = await this.deepSeekService.analisarImagem(
-      imagemBase64,
-      prompt,
-    );
-
-    console.log("🖼️ RESPOSTA BRUTA DA IA:");
-    console.log(resposta);
-
-    let resultado: unknown;
-
-    try {
-      resultado = JSON.parse(resposta);
-    } catch {
-      throw new Error("A IA não retornou um JSON válido.");
-    }
-
-    return this.validarResultado(resultado);
-  }
-
-  private validarResultado(resultado: unknown): CardapioExtraido {
-    if (
-      !resultado ||
-      typeof resultado !== "object" ||
-      Array.isArray(resultado)
-    ) {
-      throw new Error("Resposta da IA inválida.");
-    }
-
-    const dados = resultado as Record<string, unknown>;
-
-    return {
-      acompanhamentos: this.normalizarLista(dados.acompanhamentos),
-
-      proteinas: this.normalizarLista(dados.proteinas),
-
-      saladas: this.normalizarLista(dados.saladas),
-
-      alertas: this.normalizarLista(dados.alertas),
-    };
-  }
-
-  private normalizarLista(valor: unknown): string[] {
-    if (!Array.isArray(valor)) {
-      return [];
-    }
-
-    return valor
-      .filter((item): item is string => typeof item === "string")
-      .map((item) => item.trim())
-      .filter(Boolean);
-  }
-}*/
 
     const resposta = await this.deepSeekService.analisarImagem(
       imagemBase64,
@@ -241,13 +128,9 @@ Formato obrigatório:
 
     return {
       produtos: this.normalizarProdutos(dados.produtos),
-
       acompanhamentos: this.normalizarLista(dados.acompanhamentos),
-
       proteinas: this.normalizarLista(dados.proteinas),
-
       saladas: this.normalizarLista(dados.saladas),
-
       alertas: this.normalizarLista(dados.alertas),
     };
   }
@@ -263,7 +146,7 @@ Formato obrigatório:
           typeof item === "object" &&
           item !== null &&
           !Array.isArray(item) &&
-          typeof (item as Record<string, unknown>).nome === "string",
+          typeof item.nome === "string",
       )
       .map((item) => {
         const preco = item.preco;
@@ -271,10 +154,12 @@ Formato obrigatório:
 
         return {
           nome: (item.nome as string).trim(),
+
           preco:
             typeof preco === "number" && Number.isFinite(preco) && preco >= 0
               ? preco
               : null,
+
           descricao:
             typeof descricao === "string" && descricao.trim()
               ? descricao.trim()
@@ -289,10 +174,14 @@ Formato obrigatório:
       return [];
     }
 
-    return valor
-      .filter((item): item is string => typeof item === "string")
-      .map((item) => item.trim())
-      .filter(Boolean);
+    return [
+      ...new Set(
+        valor
+          .filter((item): item is string => typeof item === "string")
+          .map((item) => item.trim())
+          .filter(Boolean),
+      ),
+    ];
   }
 }
 
