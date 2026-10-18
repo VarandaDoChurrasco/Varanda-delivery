@@ -1,72 +1,62 @@
 import { ExcluirOpcaoQuentinhaService } from "./excluirOpcaoQuentinhaService.js";
 
 class ProcessarComandoExcluirQuentinha {
-  private excluirQuentinha: ExcluirOpcaoQuentinhaService;
-
-  constructor() {
-    this.excluirQuentinha = new ExcluirOpcaoQuentinhaService();
-  }
+  private excluirQuentinha = new ExcluirOpcaoQuentinhaService();
 
   async execulte(texto: string) {
+    const comando = "#deletar-item";
+
     const textoNormalizado = texto
       .trim()
       .toLowerCase()
       .normalize("NFD")
       .replace(/[\u0300-\u036f]/g, "");
 
-    if (textoNormalizado.startsWith("#deleta-item ")) {
-      const comando = texto.trim();
-      const conteudo = comando.slice("#deletar-item ".length).trim();
-      const partes = conteudo.split(/\s+/);
+    if (
+      textoNormalizado !== comando &&
+      !textoNormalizado.startsWith(`${comando} `)
+    ) {
+      return null;
+    }
 
-      if (partes.length < 2) {
-        return (
-          "❌ Formato inválido.\n\n" +
-          "Use:\n" +
-          "*#deletar-item frando assado*"
-        );
-      }
+    const nome = texto.trim().slice(comando.length).trim();
 
-      const taxaTexto = partes.pop()!;
-      const nome = partes.join(" ");
+    if (!nome) {
+      return (
+        "❌ Formato inválido.\n\n" +
+        "Use:\n" +
+        "*#deletar-item Frango grelhado*\n" +
+        "ou\n" +
+        "*#deletar-item Lasanha*"
+      );
+    }
 
-      const taxaEntrega = Number(taxaTexto.replace(",", "."));
+    try {
+      const item = await this.excluirQuentinha.executar(nome);
 
-      if (!nome || !Number.isFinite(taxaEntrega) || taxaEntrega < 0) {
-        return (
-          "❌ Dados inválidos.\n\n" + "Use:\n" + "*#deletar-item frando assado*"
-        );
-      }
+      console.log("✅ Item removido do cardápio:", item);
 
-      try {
-        console.log("📍 CADASTRANDO BAIRRO");
-        console.log("Nome:", nome);
-        console.log("Taxa:", taxaEntrega);
+      return (
+        "✅ *Item removido do cardápio!*\n\n" +
+        `📦 *${item.nome}*\n` +
+        `🌙 Período: ${item.periodo}\n\n` +
+        "O item não está mais disponível no cardápio atual."
+      );
+    } catch (error) {
+      console.error("❌ Erro ao remover item:", error);
 
-        const bairro = await this.excluirQuentinha.executar(nome);
-
-        console.log("✅ item excluido:", bairro.id);
-
-        return (
-          "✅ *Item excluido!*\n\n" +
-          `📍 *${bairro.nome}*\n
-            .toFixed(2)
-            .replace(".", ",")}`
-        );
-      } catch (error) {
-        if (
-          error instanceof Error &&
-          error.message === "O Item nao esta na lista."
-        ) {
-          return "⚠️ Este item nao existe.";
+      if (error instanceof Error) {
+        if (error.message === "Item não encontrado no cardápio ativo.") {
+          return "⚠️ Este item não está disponível no cardápio atual.";
         }
 
-        console.error("❌ Erro ao cadastrar bairro:", error);
-
-        return "❌ Não consegui excluir.\n" + "Verifique o erro no servidor.";
+        if (error.message === "Não existe cardápio ativo para este período.") {
+          return "⚠️ Não existe cardápio ativo neste período.";
+        }
       }
+
+      return "❌ Não consegui remover o item. Verifique o servidor.";
     }
-    return null;
   }
 }
 
