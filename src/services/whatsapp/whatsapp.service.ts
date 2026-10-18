@@ -22,6 +22,7 @@ import { ProcessarComandoRefrigeranteService } from "../refrigente/processarComa
 import { ProcessarComandoBairroService } from "../neighborhoodService/processarComandoBairroService.js";
 import { ProcessarComandoStatusService } from "../orderService/processarComandoStatusService.js";
 import { AlterarModoAtendimentoService } from "../clientService/alterarModoAtendimentoService.js";
+import { ProcessarComandoExcluirQuentinha } from "../quentinha/processaoComandoExclirQuentinhaItem.js";
 import QRCode from "qrcode";
 
 import { setWhatsAppSocket } from "../../lib/whatsappSocket.js";
@@ -39,6 +40,7 @@ export class WhatsAppService {
   private processarComandoBairroService: ProcessarComandoBairroService;
   private processarComandoStatusService: ProcessarComandoStatusService;
   private alterarMOdoAtendimentoIaService: AlterarModoAtendimentoService;
+  private excluirQuentinha: ProcessarComandoExcluirQuentinha;
   private qrCode: string | null = null;
 
   public getQrCode(): string | null {
@@ -65,6 +67,7 @@ export class WhatsAppService {
     this.processarComandoBairroService = new ProcessarComandoBairroService();
     this.processarComandoStatusService = new ProcessarComandoStatusService();
     this.alterarMOdoAtendimentoIaService = new AlterarModoAtendimentoService();
+    this.excluirQuentinha = new ProcessarComandoExcluirQuentinha();
   }
 
   async iniciar() {
@@ -358,6 +361,17 @@ export class WhatsAppService {
           if (respostaBairro) {
             await sock.sendMessage(remoteJid, {
               text: respostaBairro,
+            });
+
+            continue;
+          }
+
+          const produtoQuentinha =
+            await this.excluirQuentinha.execulte(textoAdmin);
+
+          if (produtoQuentinha) {
+            await sock.sendMessage(remoteJid, {
+              text: produtoQuentinha,
             });
 
             continue;
