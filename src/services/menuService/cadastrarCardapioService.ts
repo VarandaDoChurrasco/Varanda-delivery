@@ -168,7 +168,28 @@ class CadastrarCardapioService {
           const produtoExtraido = produtos[i];
 
           const preco = produtoExtraido.preco!;
-
+          //============================================
+          /* const produto = await tx.produto.upsert({
+            where: {
+              nome: produtoExtraido.nome,
+            },
+            update: {
+              descricao: produtoExtraido.descricao,
+              preco,
+              tipo: TipoProduto.SIMPLES,
+              ativo: true,
+              disponivel: true,
+            },
+            create: {
+              nome: produtoExtraido.nome,
+              descricao: produtoExtraido.descricao,
+              preco,
+              tipo: TipoProduto.SIMPLES,
+              ativo: true,
+              disponivel: true,
+            },
+          });*/
+          //===========================================
           const produto = await tx.produto.upsert({
             where: {
               nome: produtoExtraido.nome,
@@ -189,7 +210,6 @@ class CadastrarCardapioService {
               disponivel: true,
             },
           });
-
           await tx.cardapioItem.create({
             data: {
               cardapioId: cardapio.id,
