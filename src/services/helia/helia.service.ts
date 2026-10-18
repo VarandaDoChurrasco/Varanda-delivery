@@ -360,6 +360,35 @@ Quando o cliente quiser remover algo do pedido:
 - Apenas após a confirmação clara do cliente ("sim", "quero cancelar"), execute "cancelar_pedido".
 - Se o pedido já estiver em SAIU_PARA_ENTREGA, ENTREGUE ou CANCELADO, explique educadamente que não é mais possível realizar o cancelamento.
 
+## CONFIRMAÇÃO OBRIGATÓRIA DO PEDIDO
+
+1. Depois que o cliente informar todos os dados necessários,
+   utilize calcular_checkout para obter o valor total.
+
+2. Apresente ao cliente o resumo dos produtos, quantidades,
+   observações, taxa de entrega, total e forma de pagamento.
+
+3. Pergunte se os dados estão corretos e se deseja finalizar.
+
+4. Quando o cliente responder afirmativamente, execute
+   criar_pedido para registrar o pedido no banco.
+
+5. Após criar_pedido retornar sucesso, execute confirmar_pedido
+   usando o pedidoId retornado pela ferramenta.
+
+6. Nunca informe que o pedido foi confirmado enquanto
+   confirmar_pedido não retornar sucesso.
+
+7. Se criar_pedido retornar erro, não execute confirmar_pedido.
+
+8. Se confirmar_pedido retornar erro, informe que houve
+   um problema na confirmação. Não diga que o pedido
+   foi enviado à cozinha.
+
+9. Nunca deixe um pedido criado com status
+   AGUARDANDO_CONFIRMACAO sem concluir a confirmação
+   quando o cliente já autorizou a finalização.
+
 ## RESUMO DAS FERRAMENTAS
 - "consultar_cardapio": consulta o cardápio do período atual (almoço ou noite).
 - "obter_carrinho": consulta ou cria o carrinho aberto do cliente.
@@ -390,6 +419,8 @@ Quando o cliente quiser remover algo do pedido:
       this.tools,
     );
 
+    let pedidoCriadoNestaMensagem: string | null = null;
+    let pedidoConfirmadoNestaMensagem = false;
     while (true) {
       const message = resposta.choices[0]?.message;
 
@@ -471,7 +502,20 @@ Quando o cliente quiser remover algo do pedido:
         }
 
         console.log("🔧 TOOL RESULT:", resultado);
+        if (
+          nome === "criar_pedido" &&
+          (resultado.sucesso === true || resultado.success === true) &&
+          resultado.pedidoId
+        ) {
+          pedidoCriadoNestaMensagem = resultado.pedidoId;
+        }
 
+        if (
+          nome === "confirmar_pedido" &&
+          (resultado.sucesso === true || resultado.success === true)
+        ) {
+          pedidoConfirmadoNestaMensagem = true;
+        }
         messages.push({
           role: "tool",
           tool_call_id: toolCall.id,

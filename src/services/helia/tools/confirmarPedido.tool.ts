@@ -12,7 +12,10 @@ export const confirmarPedidoTool = {
     name: "confirmar_pedido",
 
     description:
-      "Confirma um pedido que está com status AGUARDANDO_CONFIRMACAO. Só deve ser usada depois que o cliente tiver confirmado explicitamente o resumo final do pedido.",
+      "Confirma um pedido com status AGUARDANDO_CONFIRMACAO. " +
+      "Use SOMENTE depois que o cliente responder afirmativamente " +
+      "à pergunta de confirmação do resumo final. " +
+      "Nunca confirme sem autorização explícita do cliente.",
 
     parameters: {
       type: "object",
