@@ -8,81 +8,6 @@ interface CriarEscolhaData {
 }
 
 export class CarrinhoItemEscolhaService {
-  /*async criar(data: CriarEscolhaData) {
-    const { carrinhoItemId, tipo, nome, opcaoId } = data;
-
-    const carrinhoItem = await prisma.carrinhoItem.findUnique({
-      where: {
-        id: carrinhoItemId,
-      },
-      include: {
-        carrinho: true,
-      },
-    });
-
-    if (carrinhoItem?.carrinho.status !== "ABERTO") {
-      throw new Error(
-        "Não é possível adicionar escolhas a um carrinho finalizado.",
-      );
-    }
-
-    if (!carrinhoItem) {
-      throw new Error("Item do carrinho não encontrado.");
-    }
-
-    const tamanhoQuentinha = await prisma.tamanhoQuentinha.findUnique({
-      where: {
-        id: carrinhoItem.tamanhoId ?? undefined,
-      },
-    });
-
-    if (!tamanhoQuentinha) {
-      throw new Error("Tamanho da quentinha não encontrado.");
-    }
-    // VALIDAR QUANTIDADE DE PROTEÍNAS
-    // ==========================================
-
-    const escolhaExistente = await prisma.carrinhoItemEscolha.findFirst({
-      where: {
-        carrinhoItemId,
-        tipo,
-        opcaoId,
-      },
-    });
-
-    if (escolhaExistente) {
-      throw new Error(`A opção "${nome}" já foi adicionada a esta quentinha.`);
-    }
-
-    if (tipo === "PROTEINA") {
-      const quantidadeProteinas = await prisma.carrinhoItemEscolha.count({
-        where: {
-          carrinhoItemId,
-          tipo: "PROTEINA",
-        },
-      });
-
-      if (quantidadeProteinas >= tamanhoQuentinha.maxProteinas) {
-        throw new Error(
-          `A quentinha ${tamanhoQuentinha.nome} permite no máximo ${tamanhoQuentinha.maxProteinas} proteína(s).`,
-        );
-      }
-    }
-
-    // ==========================================
-    // CRIAR ESCOLHA
-    // ==========================================
-
-    return await prisma.carrinhoItemEscolha.create({
-      data: {
-        carrinhoItemId,
-        tipo,
-        nome,
-        opcaoId,
-      },
-    });
-  }*/
-
   async criar(data: CriarEscolhaData) {
     const { carrinhoItemId, tipo, nome, opcaoId } = data;
 
@@ -90,8 +15,14 @@ export class CarrinhoItemEscolhaService {
       throw new Error("O ID da opção é obrigatório.");
     }
 
+    // ==========================================
+    // 1. BUSCAR ITEM DO CARRINHO
+    // ==========================================
+
     const carrinhoItem = await prisma.carrinhoItem.findUnique({
-      where: { id: carrinhoItemId },
+      where: {
+        id: carrinhoItemId,
+      },
       include: {
         carrinho: true,
         produto: true,
@@ -111,10 +42,19 @@ export class CarrinhoItemEscolhaService {
     let maxProteinas: number;
     let nomeItem: string;
 
-    // QUENTINHAS DO ALMOÇO
+    const ehQuentinha = Boolean(carrinhoItem.tamanhoId);
+
+    // ==========================================
+    // 2. IDENTIFICAR QUENTINHA OU JANTINHA
+    // ==========================================
+
     if (carrinhoItem.tamanhoId) {
+      // QUENTINHAS DO ALMOÇO
+
       const tamanho = await prisma.tamanhoQuentinha.findUnique({
-        where: { id: carrinhoItem.tamanhoId },
+        where: {
+          id: carrinhoItem.tamanhoId,
+        },
       });
 
       if (!tamanho) {
@@ -123,13 +63,12 @@ export class CarrinhoItemEscolhaService {
 
       maxProteinas = tamanho.maxProteinas;
       nomeItem = `Quentinha ${tamanho.nome}`;
-    }
-
-    // JANTINHAS DO CARDÁPIO NOTURNO
-    else if (
+    } else if (
       carrinhoItem.produto?.nome === "Jantinha P" ||
       carrinhoItem.produto?.nome === "Jantinha M"
     ) {
+      // JANTINHAS DO CARDÁPIO NOTURNO
+
       nomeItem = carrinhoItem.produto.nome;
 
       maxProteinas = nomeItem === "Jantinha P" ? 1 : 2;
@@ -137,14 +76,15 @@ export class CarrinhoItemEscolhaService {
       if (tipo === "SALADA") {
         throw new Error("O cardápio noturno não possui saladas para Jantinha.");
       }
-    }
-
-    // OUTROS PRODUTOS
-    else {
+    } else {
       throw new Error(
         "Este produto não permite escolhas de proteínas ou acompanhamentos.",
       );
     }
+
+    // ==========================================
+    // 3. DATA ATUAL NO FUSO DE SÃO PAULO
+    // ==========================================
 
     const partes = new Intl.DateTimeFormat("en-CA", {
       timeZone: "America/Sao_Paulo",
@@ -153,55 +93,80 @@ export class CarrinhoItemEscolhaService {
       day: "2-digit",
     }).formatToParts(new Date());
 
-    const obterParte = (tipo: string) =>
-      Number(partes.find((parte) => parte.type === tipo)?.value);
+    const obterParte = (parteTipo: string) =>
+      Number(partes.find((parte) => parte.type === parteTipo)?.value);
 
     const dataHoje = new Date(
       Date.UTC(obterParte("year"), obterParte("month") - 1, obterParte("day")),
     );
-    const periodo = carrinhoItem.tamanhoId ? "ALMOCO" : "NOITE";
 
-    const itemCardapio = await prisma.cardapioItem.findFirst({
-      where: {
-        produtoId: carrinhoItem.produtoId,
-        disponivel: true,
-        cardapio: {
+    // ==========================================
+    // 4. IDENTIFICAR PERÍODO DO CARDÁPIO
+    // ==========================================
+
+    const periodo = ehQuentinha ? "ALMOCO" : "NOITE";
+
+    let cardapioId: string;
+
+    if (periodo === "ALMOCO") {
+      // QUENTINHAS NÃO POSSUEM produtoId.
+      // BUSCAR DIRETAMENTE O CARDÁPIO DO ALMOÇO.
+
+      const cardapio = await prisma.cardapio.findFirst({
+        where: {
           data: dataHoje,
-          periodo,
+          periodo: "ALMOCO",
           ativo: true,
         },
-      },
-      select: {
-        cardapioId: true,
-      },
-    });
-    /*const periodo = carrinhoItem.tamanhoId ? "ALMOCO" : "NOITE";
-    // VALIDAR OPÇÃO NO CARDÁPIO DO ITEM
-    const itemCardapio = await prisma.cardapioItem.findFirst({
-      where: {
-        produtoId: carrinhoItem.produtoId,
-        disponivel: true,
-        cardapio: {
-          ativo: true,
+        select: {
+          id: true,
         },
-      },
-      select: {
-        cardapioId: true,
-      },
-      orderBy: {
-        cardapio: {
-          data: "desc",
-        },
-      },
-    });*/
+      });
 
-    if (!itemCardapio) {
-      throw new Error("Produto não encontrado em um cardápio disponível.");
+      if (!cardapio) {
+        throw new Error("Não existe cardápio do almoço disponível para hoje.");
+      }
+
+      cardapioId = cardapio.id;
+    } else {
+      // JANTINHAS POSSUEM produtoId.
+      // VALIDAR SE O PRODUTO ESTÁ NO CARDÁPIO NOTURNO.
+
+      if (!carrinhoItem.produtoId) {
+        throw new Error("Produto noturno não identificado.");
+      }
+
+      const itemCardapio = await prisma.cardapioItem.findFirst({
+        where: {
+          produtoId: carrinhoItem.produtoId,
+          disponivel: true,
+          cardapio: {
+            data: dataHoje,
+            periodo: "NOITE",
+            ativo: true,
+          },
+        },
+        select: {
+          cardapioId: true,
+        },
+      });
+
+      if (!itemCardapio) {
+        throw new Error(
+          "Produto não encontrado no cardápio noturno disponível.",
+        );
+      }
+
+      cardapioId = itemCardapio.cardapioId;
     }
+
+    // ==========================================
+    // 5. VALIDAR OPÇÃO NO CARDÁPIO CORRETO
+    // ==========================================
 
     const opcaoCardapio = await prisma.cardapioOpcaoQuentinha.findFirst({
       where: {
-        cardapioId: itemCardapio.cardapioId,
+        cardapioId,
         opcaoId,
         tipo,
         disponivel: true,
@@ -212,14 +177,27 @@ export class CarrinhoItemEscolhaService {
     });
 
     if (!opcaoCardapio) {
-      throw new Error("Esta opção não pertence ao cardápio do item.");
+      throw new Error(
+        `A opção "${nome}" não está disponível no cardápio de ${periodo === "ALMOCO" ? "almoço" : "noite"} de hoje.`,
+      );
+    }
+
+    if (!opcaoCardapio.opcao.ativo) {
+      throw new Error(`A opção "${nome}" está desativada.`);
+    }
+
+    if (!opcaoCardapio.opcao.disponivel) {
+      throw new Error(`A opção "${nome}" está indisponível.`);
     }
 
     if (opcaoCardapio.opcao.nome !== nome) {
       throw new Error("O nome da opção não corresponde ao ID informado.");
     }
 
-    // IMPEDIR ESCOLHAS DUPLICADAS
+    // ==========================================
+    // 6. IMPEDIR ESCOLHAS DUPLICADAS
+    // ==========================================
+
     const escolhaExistente = await prisma.carrinhoItemEscolha.findFirst({
       where: {
         carrinhoItemId,
@@ -231,7 +209,10 @@ export class CarrinhoItemEscolhaService {
       throw new Error(`A opção "${nome}" já foi adicionada a ${nomeItem}.`);
     }
 
-    // VALIDAR LIMITE DE PROTEÍNAS
+    // ==========================================
+    // 7. VALIDAR LIMITE DE PROTEÍNAS
+    // ==========================================
+
     if (tipo === "PROTEINA") {
       const quantidadeProteinas = await prisma.carrinhoItemEscolha.count({
         where: {
@@ -247,16 +228,40 @@ export class CarrinhoItemEscolhaService {
       }
     }
 
-    // SALVAR ESCOLHA
+    // ==========================================
+    // 8. VALIDAR LIMITE DE SALADAS
+    // ==========================================
+
+    if (tipo === "SALADA") {
+      const quantidadeSaladas = await prisma.carrinhoItemEscolha.count({
+        where: {
+          carrinhoItemId,
+          tipo: "SALADA",
+        },
+      });
+
+      if (quantidadeSaladas >= 2) {
+        throw new Error("A quentinha permite no máximo 2 saladas.");
+      }
+    }
+
+    // ==========================================
+    // 9. SALVAR ESCOLHA
+    // ==========================================
+
     return await prisma.carrinhoItemEscolha.create({
       data: {
         carrinhoItemId,
         tipo,
-        nome,
+        nome: opcaoCardapio.opcao.nome,
         opcaoId,
       },
     });
   }
+
+  // ==========================================
+  // LISTAR ESCOLHAS
+  // ==========================================
 
   async listarPorCarrinhoItem(carrinhoItemId: string) {
     return await prisma.carrinhoItemEscolha.findMany({
@@ -269,6 +274,10 @@ export class CarrinhoItemEscolhaService {
     });
   }
 
+  // ==========================================
+  // BUSCAR ESCOLHA POR ID
+  // ==========================================
+
   async buscarPorId(id: string) {
     return await prisma.carrinhoItemEscolha.findUnique({
       where: {
@@ -276,6 +285,10 @@ export class CarrinhoItemEscolhaService {
       },
     });
   }
+
+  // ==========================================
+  // EXCLUIR ESCOLHA
+  // ==========================================
 
   async excluir(id: string) {
     const escolha = await prisma.carrinhoItemEscolha.findUnique({

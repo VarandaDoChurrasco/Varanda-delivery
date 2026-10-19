@@ -68,8 +68,9 @@ enum PeriodoCardapio {
 }
 
 enum TipoProduto {
-  QUENTINHA
   SIMPLES
+  QUENTINHA
+  JANTINHA
 }
 
 model Configuracao {

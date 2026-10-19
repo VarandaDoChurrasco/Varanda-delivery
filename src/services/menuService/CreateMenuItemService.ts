@@ -3,11 +3,22 @@ import { CardapioItemCreateRequest } from "../../type/type.js";
 
 class createMenuItemService {
   async execulte(dados: CardapioItemCreateRequest) {
-    if (!dados || !dados.cardapioId || !dados.produtoId || !dados.preco) {
-      throw new Error(
-        "Envie todos os dados obrigatórios (cardapioId, produtoId, preco)",
-      );
-    }
+  //  if (!dados || !dados.cardapioId || !dados.produtoId || !dados.preco) {
+     // throw new Error(
+    //    "Envie todos os dados obrigatórios (cardapioId, produtoId, preco)",
+     // );
+   // }
+if (
+  !dados ||
+  !dados.cardapioId ||
+  !dados.produtoId ||
+  dados.preco == null
+) {
+  throw new Error(
+    "Envie todos os dados obrigatórios (cardapioId, produtoId, preco)"
+  );
+}
+
     const cardapio = await prisma.cardapio.findUnique({
       where: {
         id: dados.cardapioId,
