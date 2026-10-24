@@ -1,3 +1,4 @@
+import { orderStatusScheduler } from "./orderStatusScheduler.js";
 import { prisma } from "../../lib/prisma.js";
 import { StatusPedido, TipoPedido } from "@prisma/client";
 
@@ -38,11 +39,15 @@ class entregueOrderService {
     const entregue = await prisma.pedido.update({
       where: {
         id,
+        status: pedido.status,
+        updatedAt: pedido.updatedAt,
       },
       data: {
         status: StatusPedido.ENTREGUE,
       },
     });
+
+    orderStatusScheduler.synchronize(entregue);
 
     return entregue;
   }

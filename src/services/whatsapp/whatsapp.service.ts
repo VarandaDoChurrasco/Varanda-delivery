@@ -24,7 +24,7 @@ import { ProcessarComandoStatusService } from "../orderService/processarComandoS
 import { AlterarModoAtendimentoService } from "../clientService/alterarModoAtendimentoService.js";
 import { ProcessarComandoExcluirQuentinha } from "../quentinha/processaoComandoExclirQuentinhaItem.js";
 import QRCode from "qrcode";
-
+import { mkdir, rm } from "node:fs/promises";
 import { setWhatsAppSocket } from "../../lib/whatsappSocket.js";
 
 export class WhatsAppService {
@@ -42,6 +42,58 @@ export class WhatsAppService {
   private alterarMOdoAtendimentoIaService: AlterarModoAtendimentoService;
   private excluirQuentinha: ProcessarComandoExcluirQuentinha;
   private qrCode: string | null = null;
+  private socket: ReturnType<typeof makeWASocket> | null = null;
+  private status: "conectado" | "conectando" | "desconectado" = "desconectado";
+  private generation = 0;
+  private operations: Promise<unknown> = Promise.resolve();
+  private authWrites: Promise<unknown> = Promise.resolve();
+  private resetPending: Promise<unknown> | null = null;
+
+  public getStatus() {
+    return { status: this.status, qr: this.qrCode };
+  }
+
+  private serialize<T>(operation: () => Promise<T>): Promise<T> {
+    const result = this.operations.then(operation);
+    this.operations = result.catch(() => {});
+    return result;
+  }
+
+  public iniciar() {
+    return this.serialize(async () => {
+      if (this.socket) return this.socket;
+      return this.conectar();
+    });
+  }
+
+  public resetar() {
+    if (this.resetPending) return this.resetPending;
+    const reset = this.serialize(async () => {
+      await this.encerrar();
+      // Toda escrita já iniciada termina antes de remover a sessão.
+      await this.authWrites;
+      await rm("./auth_info_baileys", { recursive: true, force: true });
+      return this.conectar();
+    });
+    this.resetPending = reset;
+    void reset.finally(() => { this.resetPending = null; }).catch(() => {});
+    return reset;
+  }
+
+  private async encerrar() {
+    const old = this.socket;
+    ++this.generation;
+    this.socket = null;
+    this.qrCode = null;
+    this.status = "desconectado";
+    setWhatsAppSocket(null);
+    if (old) {
+      old.ev.removeAllListeners("connection.update");
+      old.ev.removeAllListeners("creds.update");
+      old.ev.removeAllListeners("messages.upsert");
+      await old.end(new Error("Conexão substituída"));
+    }
+  }
 
   public getQrCode(): string | null {
     return this.qrCode;
@@ -70,23 +122,54 @@ export class WhatsAppService {
     this.excluirQuentinha = new ProcessarComandoExcluirQuentinha();
   }
 
-  async iniciar() {
+  private async conectar() {
+    try {
+      return await this.criarSocket();
+    } catch (error) {
+      await this.encerrar();
+      throw error;
+    }
+  }
+
+  private async criarSocket() {
+    this.status = "conectando";
+    const generation = ++this.generation;
+    const current = () => generation === this.generation;
+    await mkdir("./auth_info_baileys", { recursive: true });
+
     const { state, saveCreds } = await useMultiFileAuthState(
       "./auth_info_baileys",
     );
+
+    // Inclui escritas das chaves Signal, além de creds.update, na barreira do reset.
+    const write = (operation: () => Promise<void>) => {
+      const pending = this.authWrites.then(async () => {
+        if (current()) await operation();
+      });
+      this.authWrites = pending.catch(error => {
+        console.error("Erro ao salvar autenticação do WhatsApp:", error);
+      });
+      return pending;
+    };
+    const setKeys = state.keys.set.bind(state.keys);
+    state.keys.set = data => write(() => setKeys(data));
 
     const sock = makeWASocket({
       auth: state,
       printQRInTerminal: false,
     });
+    this.socket = sock;
     setWhatsAppSocket(sock);
 
     console.log("📱 CONTA CONECTADA:", sock.user);
 
-    sock.ev.on("creds.update", saveCreds);
+    sock.ev.on("creds.update", () => {
+      if (current()) void write(saveCreds).catch(() => {});
+    });
 
     sock.ev.on("messages.upsert", async ({ messages }: { messages: any[] }) => {
       for (const message of messages) {
+        if (!current()) return;
         if (!message.message) continue;
         //if (message.key.fromMe) continue;
 
@@ -589,40 +672,40 @@ export class WhatsAppService {
       }
     });
 
+    let qrRevision = 0;
     sock.ev.on("connection.update", async (update: any) => {
+      if (!current()) return;
       const { connection, lastDisconnect, qr } = update;
-      //=====================================================================
-      //  if (qr) {
-      // console.log("\n📱 Escaneie este QR Code com o WhatsApp:\n");
-
-      // qrcode.generate(qr, { small: true });
-      //  }
-      //=========================================================================================
-      if (qr) {
-        //this.qrCode = qr;
-        this.qrCode = await QRCode.toDataURL(qr);
-
-        console.log("\n📱 Novo QR Code gerado.\n");
-
-        qrcode.generate(qr, { small: true });
+      if (connection === "close") {
+        ++qrRevision;
+        const shouldReconnect =
+          lastDisconnect?.error?.output?.statusCode !== DisconnectReason.loggedOut;
+        // Invalida imediatamente, inclusive conversões de QR ainda em andamento.
+        const closing = this.encerrar();
+        void this.serialize(async () => {
+          await closing;
+          await this.authWrites;
+          if (shouldReconnect && !this.socket) return this.conectar();
+        }).catch(error => console.error("Erro ao reconectar WhatsApp:", error));
+        return;
       }
       if (connection === "open") {
+        ++qrRevision;
+        this.status = "conectado";
         this.qrCode = null;
         console.log("\n✅ WhatsApp conectado com sucesso!\n");
+        return;
       }
-
-      if (connection === "close") {
-        const statusCode = (lastDisconnect?.error as any)?.output?.statusCode;
-
-        const shouldReconnect = statusCode !== DisconnectReason.loggedOut;
-
-        console.log(
-          "\n❌ WhatsApp desconectado.",
-          `Reconectar: ${shouldReconnect}`,
-        );
-
-        if (shouldReconnect) {
-          this.iniciar();
+      if (qr) {
+        const revision = ++qrRevision;
+        try {
+          const image = await QRCode.toDataURL(qr);
+          if (!current() || revision !== qrRevision) return;
+          this.qrCode = image;
+          console.log("\n📱 Novo QR Code gerado.\n");
+          qrcode.generate(qr, { small: true });
+        } catch (error) {
+          console.error("Erro ao gerar QR Code:", error);
         }
       }
     });
