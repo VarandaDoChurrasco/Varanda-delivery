@@ -10,6 +10,10 @@ const { cancelOrderService } = await import('../dist/services/orderService/cance
 const { entregueOrderService } = await import('../dist/services/orderService/deliveredOrderService.js');
 const { SaiuEntregaOrderService } = await import('../dist/services/orderService/outForDeliveryOrderController.js');
 
+// Confirmation persists its print request in the same transaction.
+prisma.$transaction = async callback => callback(prisma);
+prisma.printRequest.upsert = async () => ({});
+
 const base = { id: 'one', tipo: 'DELIVERY', status: 'PRONTO', confirmadoEm: new Date(0), updatedAt: new Date(1) };
 
 for (const [name, Service, from, to] of [

@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { printRequestsRouter } from "./printRequests.js";
 
 //=========================Clientes============================================================
 import { CreateClientController } from "../controllers/client/createClientController.js";
@@ -180,5 +181,7 @@ router.get("/getOrder/:id", new getOrderController().handle);
 
 router.get("/orderAll", new getAllOrderController().handle);
 router.get("/orderToday", new GetOrderTodayController().handle);
+
+router.use("/print-requests", printRequestsRouter);
 
 export { router };

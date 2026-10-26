@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { EventEmitter } from 'node:events';
 import express from 'express';
+import { httpRequest } from './helpers/httpRequest.mjs';
 import { createWhatsAppRouter } from '../dist/routes/whatsapp.js';
 
 const flush = async () => { for (let i = 0; i < 50; ++i) await Promise.resolve(); };
@@ -97,25 +98,22 @@ test('rotas POST falham fechadas; GET apenas consulta; token autoriza controles'
   const app = express();
   app.use('/whatsapp', createWhatsAppRouter({ getStatus: () => ({ status: 'desconectado', qr: null }),
     iniciar: async () => { starts++; }, resetar: async () => { resets++; } }));
-  const server = app.listen(0, '127.0.0.1');
-  await new Promise(resolve => server.once('listening', resolve));
-  const url = `http://127.0.0.1:${server.address().port}/whatsapp`;
+  const request = (path, options) => httpRequest(app, '/whatsapp' + path, options);
   try {
     delete process.env.WHATSAPP_ADMIN_TOKEN;
-    assert.equal((await fetch(url + '/iniciar', { method: 'POST' })).status, 503);
+    assert.equal((await request('/iniciar', { method: 'POST' })).status, 503);
     process.env.WHATSAPP_ADMIN_TOKEN = 'test-secret';
-    assert.equal((await fetch(url + '/resetar', { method: 'POST' })).status, 401);
-    assert.equal((await fetch(url + '/iniciar')).status, 404);
-    assert.equal((await fetch(url + '/qr')).status, 200);
-    assert.equal((await fetch(url + '/status')).status, 200);
+    assert.equal((await request('/resetar', { method: 'POST' })).status, 401);
+    assert.equal((await request('/iniciar')).status, 404);
+    assert.equal((await request('/qr')).status, 200);
+    assert.equal((await request('/status')).status, 200);
     assert.equal(starts + resets, 0);
     for (const action of ['iniciar', 'resetar']) {
-      assert.equal((await fetch(url + '/' + action, { method: 'POST', headers: { Authorization: 'Bearer test-secret' } })).status, 200);
+      assert.equal((await request('/' + action, { method: 'POST', headers: { Authorization: 'Bearer test-secret' } })).status, 200);
     }
     assert.equal(starts, 1); assert.equal(resets, 1);
   } finally {
     if (previous === undefined) delete process.env.WHATSAPP_ADMIN_TOKEN;
     else process.env.WHATSAPP_ADMIN_TOKEN = previous;
-    await new Promise(resolve => server.close(resolve));
   }
 });

@@ -29,7 +29,8 @@ class GetMenuService {
 
     //const periodo = hora < 15 ? "ALMOCO" : "NOITE";
     const periodo =
-      hora < 14 || (hora === 14 && minuto < 20) ? "ALMOCO" : "NOITE";
+      //  hora < 14 || (hora === 14 && minuto < 20) ? "ALMOCO" : "NOITE";
+      hora < 15 ? "ALMOCO" : "NOITE";
     // A partir das 15h, desativa o cardápio do almoço de hoje.
     // Não apaga os registros do banco.
     if (periodo === "NOITE") {

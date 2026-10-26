@@ -428,6 +428,8 @@ model Pedido {
 
   itens PedidoItem[]
 
+  impressao PrintRequest?
+
   confirmadoEm DateTime?
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
@@ -508,4 +510,27 @@ model PedidoItemRemocao {
   pedidoItem PedidoItem @relation(fields: [pedidoItemId], references: [id])
 
   @@index([pedidoItemId])
+}
+
+// A row is created only by a new confirmation, or an explicit manual print.
+// ATTEMPTED is deliberately never retried automatically.
+enum PrintRequestStatus {
+  PENDING
+  ATTEMPTED
+  SENT
+}
+
+model PrintRequest {
+  pedidoId String @id
+  pedido Pedido @relation(fields: [pedidoId], references: [id], onDelete: Restrict)
+  payload Json
+  status PrintRequestStatus @default(PENDING)
+  attempt Int @default(0)
+  attemptedAt DateTime?
+  completedAt DateTime?
+  confirmedByOperator Boolean @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status, createdAt])
 }

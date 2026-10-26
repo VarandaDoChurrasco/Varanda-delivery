@@ -1,6 +1,5 @@
 import { confirmOrderService } from "../../orderService/confirmOrderService.js";
 import { EnviarComprovantePedidoService } from "../../printService/enviarComprovantePedidoService.js";
-import { io } from "../../../lib/socket.js";
 
 const pedidoService = new confirmOrderService();
 const enviarComprovante = new EnviarComprovantePedidoService();
@@ -45,19 +44,6 @@ export async function executarConfirmarPedido(args: { pedidoId: string }) {
     "🟢 CONFIRMAR_PEDIDO: pedido confirmado no banco:",
     pedido.numero,
   );
-
-  console.log("🟡 CONFIRMAR_PEDIDO: chamando emitirNovoPedido...");
-
-  //emitirNovoPedido(pedido);
-  if (!io) {
-    console.error("❌ Socket.IO não configurado; pedido não enviado.");
-  } else {
-    console.log("🔌 Clientes conectados:", io.sockets.sockets.size);
-
-    io.emit("novo_pedido", pedido);
-
-    console.log("📡 Evento novo_pedido emitido:", pedido.numero);
-  }
 
   console.log(
     `✅ Pedido #${pedido.numero} confirmado. Status: ${pedido.status}`,
