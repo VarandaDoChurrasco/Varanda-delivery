@@ -22,8 +22,13 @@ class TransferirAtendimentoService {
       },
       data: {
         modoAtendimento: "HUMANO",
+        humanoAte: new Date(Date.now() + 60 * 1000),
       },
     });
+
+    console.log(`👤 Atendimento humano ativado para ${clienteAtualizado.nome}`);
+
+    console.log(`⏳ Retorno previsto para: ${clienteAtualizado.humanoAte}`);
 
     return clienteAtualizado;
   }

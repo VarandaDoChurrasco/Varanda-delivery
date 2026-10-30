@@ -7,8 +7,10 @@ export const consultarBebidasTool = {
   function: {
     name: "consultar_bebidas",
     description:
-      "Consulta todas as bebidas atualmente disponíveis para venda, incluindo nome e preço. Pode retornar refrigerantes, cervejas e outras bebidas cadastradas. Deve ser usada antes de informar ao cliente quais bebidas estão disponíveis ou seus preços.",
-
+      "Consulta as bebidas disponíveis para venda, incluindo nome e preço. " +
+      "Deve ser utilizada sempre que o cliente perguntar sobre bebidas, valores ou disponibilidade. " +
+      "Não deve oferecer bebidas esgotadas ou indisponíveis. " +
+      "Utilize somente as bebidas retornadas pela ferramenta.",
     parameters: {
       type: "object",
       properties: {},

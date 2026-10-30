@@ -1,5 +1,6 @@
 import { CadastrarRefrigeranteService } from "./cadastrarRefrigeranteService.js";
 import { ConsultarListRefrigerantesService } from "./consultarListRefrigerantesController.js";
+import statusRefrigenteService from "./statusRefrigenteService.js";
 
 class ProcessarComandoRefrigeranteService {
   private cadastrarRefrigeranteService: CadastrarRefrigeranteService;
@@ -91,6 +92,34 @@ class ProcessarComandoRefrigeranteService {
         `🥤 *${refrigerante.nome}*\n` +
         `💰 R$ ${Number(refrigerante.preco).toFixed(2).replace(".", ",")}`
       );
+    }
+
+    // DESATIVAR (marcar como acabou)
+    if (textoNormalizado.startsWith("#desativar-refrigerante ")) {
+      const nome = texto.trim().slice("#desativar-refrigerante ".length).trim();
+
+      if (!nome) {
+        return "❌ Formato inválido.\n\nUse:\n*#desativar-refrigerante Coca-Cola*";
+      }
+
+      const ref = await statusRefrigenteService.desativarPorNome(nome);
+
+      if (!ref) {
+        return `❌ Refrigerante *${nome}* não encontrado.`;
+      }
+
+      return `✅ *${ref.nome}* marcado como acabado hoje.`;
+    }
+
+    if (textoNormalizado.startsWith("#reativar-refrigerante ")) {
+      const nome = texto.trim().slice("#reativar-refrigerante ".length).trim();
+      const ref = await statusRefrigenteService.buscarPorNome(nome);
+      if (!ref) {
+        return `❌ Refrigerante *${nome}* não encontrado.`;
+      }
+
+      await statusRefrigenteService.marcarComoAtivo(ref.id);
+      return `✅ *${ref.nome}* reativado.`;
     }
 
     return null;

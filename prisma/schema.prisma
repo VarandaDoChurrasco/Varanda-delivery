@@ -53,6 +53,7 @@ model Refrigerante {
   nome      String
   preco     Decimal              @db.Decimal(10, 2)
   ativo     Boolean              @default(true)
+ acabouEm  DateTime? 
   createdAt DateTime             @default(now())
   updatedAt DateTime             @updatedAt
   pedidos   PedidoRefrigerante[]

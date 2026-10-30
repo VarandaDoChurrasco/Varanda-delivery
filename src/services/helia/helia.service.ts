@@ -511,6 +511,16 @@ Quando o cliente quiser remover algo do pedido:
 
         console.log("🔧 TOOL RESULT:", resultado);
         if (
+          nome === "transferir_para_humano" &&
+          (resultado.sucesso === true || resultado.success === true)
+        ) {
+          console.log(
+            `👤 Cliente ${cliente.id} transferido para atendimento humano.`,
+          );
+
+          return "Certo! 😊 Vou transferir seu atendimento para uma pessoa, que poderá continuar a conversa com você.";
+        }
+        if (
           nome === "criar_pedido" &&
           (resultado.sucesso === true || resultado.success === true) &&
           resultado.pedidoId
